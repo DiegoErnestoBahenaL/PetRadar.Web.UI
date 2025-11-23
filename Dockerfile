@@ -10,8 +10,8 @@ RUN npm ci
 # Copiar el resto del código
 COPY . .
 
-# Build producción (ajusta el comando si tu "build" tiene otro nombre)
-RUN npm run build -- --configuration=production
+
+RUN npm run build 
 
 # Etapa de runtime con Nginx
 FROM nginx:stable-alpine AS runtime
