@@ -4,7 +4,7 @@ FROM node:20.19.5-alpine AS build
 WORKDIR /app
 
 # Instalar dependencias
-COPY PetRadar-Web-UI/package*.json ./
+COPY package*.json ./
 RUN npm ci
 
 # Copiar el resto del código
