@@ -1,0 +1,142 @@
+<div class="page-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Iniciar sesión</h1>
+    <p class="auth-subtitle">
+      Ingresa tus credenciales para acceder al sistema.
+    </p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Correo -->
+      <div class="form-group">
+        <label for="correo">Correo electrónico</label>
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          placeholder="tucorreo@ejemplo.com"
+        />
+        <div class="error-message" *ngIf="enviado && f['correo'].invalid">
+          <span *ngIf="f['correo'].errors?.['required']">
+            El correo es obligatorio.
+          </span>
+          <span *ngIf="f['correo'].errors?.['email']">
+            Ingresa un correo válido.
+          </span>
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input
+          id="password"
+          [type]="mostrarPassword ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="••••••••"
+        />
+        <div class="toggle-password" (click)="toggleMostrarPassword()">
+          {{ mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }}
+        </div>
+        <div class="error-message" *ngIf="enviado && f['password'].invalid">
+          <span *ngIf="f['password'].errors?.['required']">
+            La contraseña es obligatoria.
+          </span>
+        </div>
+      </div>
+
+      <!-- Recordar correo -->
+    <div class="form-group" style="margin-bottom: 10px;">
+    <label class="checkbox-inline">
+        <input type="checkbox" formControlName="recordarCorreo" />
+        <span>Recordar correo en este dispositivo</span>
+    </label>
+    </div>
+
+      <!-- Mensajes de error / info -->
+      <div class="error-message" *ngIf="errorGeneral">
+        {{ errorGeneral }}
+      </div>
+
+      <div class="success-message" *ngIf="mensajeInfo">
+        {{ mensajeInfo }}
+        <!-- Opción para reenviar verificación -->
+        <div style="margin-top: 6px;">
+          <button type="button" class="btn-secondary" (click)="reenviarVerificacion()">
+            Reenviar correo de verificación
+          </button>
+        </div>
+      </div>
+
+      <!-- Botones principales -->
+      <div style="margin-top: 15px;">
+        <button type="submit" class="btn-primary" [disabled]="cargando">
+          {{ cargando ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn-secondary"
+          style="margin-top: 10px;"
+          (click)="irARegistro()"
+        >
+          Crear cuenta
+        </button>
+      </div>
+    </form>
+
+    <!-- Olvidé mi contraseña -->
+    <div style="margin-top: 18px; text-align: center;">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="mostrarRecuperacion()"
+      >
+        Olvidé mi contraseña
+      </button>
+    </div>
+
+    <!-- Sección de recuperación de contraseña -->
+    <div class="recuperacion-section" *ngIf="mostrandoRecuperacion">
+      <h3 style="font-size: 1rem; margin-bottom: 8px;">Recuperar contraseña</h3>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label for="recCorreo">Correo electrónico</label>
+        <input
+          id="recCorreo"
+          type="email"
+          [(ngModel)]="recuperacionCorreo"
+          name="recuperacionCorreo"
+          placeholder="tucorreo@ejemplo.com"
+        />
+      </div>
+      <div class="small-info">
+        Ingresa tu correo y te enviaremos instrucciones para restablecer tu
+        contraseña.
+      </div>
+
+      <div
+        class="error-message"
+        *ngIf="mensajeRecuperacion && mensajeRecuperacion.startsWith('Ingresa')"
+        style="margin-top: 8px;"
+      >
+        {{ mensajeRecuperacion }}
+      </div>
+
+      <div
+        class="success-message"
+        *ngIf="mensajeRecuperacion && !mensajeRecuperacion.startsWith('Ingresa')"
+        style="margin-top: 8px;"
+      >
+        {{ mensajeRecuperacion }}
+      </div>
+
+      <div class="recuperacion-actions">
+        <button type="button" class="btn-primary" (click)="enviarRecuperacion()">
+          Enviar instrucciones
+        </button>
+        <button type="button" class="btn-secondary" (click)="cancelarRecuperacion()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
