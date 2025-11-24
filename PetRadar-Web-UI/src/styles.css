@@ -1,1 +1,136 @@
 /* You can add global styles to this file, and also import other style files */
+/* ======= GLOBAL RESET ======= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f6f7fb;
+  height: 100%;
+  color: #333;
+}
+
+/* ======= CONTENEDOR CENTRALIZADO ======= */
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* ======= CARD GENERAL ======= */
+.auth-card {
+  background: #fff;
+  width: 380px;
+  padding: 30px 35px;
+  border-radius: 12px;
+  box-shadow: 0px 8px 25px rgba(0,0,0,0.08);
+}
+
+/* ===== TITULOS ===== */
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* ===== INPUTS ===== */
+input, select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #cfd3dc;
+  outline: none;
+  font-size: 0.95rem;
+  transition: border 0.2s;
+}
+
+input:focus {
+  border-color: #4573ff;
+}
+
+label {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  display: block;
+  color: #444;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+/* ===== BOTONES ===== */
+.btn-primary {
+  background: #4573ff;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #325dea;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #4573ff;
+  border: 1px solid #4573ff;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-secondary:hover {
+  background: #e8efff;
+}
+
+/* ===== MENSAJES ===== */
+.error-message {
+  color: #d64545;
+  font-size: 0.85rem;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+.success-message {
+  color: #27a844;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.small-info {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.checkbox-inline input {
+  margin: 0;
+}

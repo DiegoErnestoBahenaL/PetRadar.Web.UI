@@ -1,0 +1,22 @@
+.recuperacion-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border: 1px solid #d3d9f8;
+}
+
+.recuperacion-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.toggle-password {
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #4573ff;
+  cursor: pointer;
+  text-align: right;
+}
