@@ -1,0 +1,12 @@
+body {
+  background-image: url("https://i.pinimg.com/736x/bc/2c/89/bc2c890bc342cce11bf87675e4a39fba.jpg");
+  background-repeat: no-repeat; /* Prevents the image from tiling */
+  background-size: cover; /* Scales the image to cover the entire container */
+  background-position: center;
+}
+
+.bad-script-regular {
+  font-family: "Bad Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
