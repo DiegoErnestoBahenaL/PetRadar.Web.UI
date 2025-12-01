@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { User } from './user.model';
 
 
-const API_ROOT = 'https://localhost:7159';
+const API_ROOT = 'https://api-qa.petradar-qa.org';
 
 const API_USERS = `${API_ROOT}/api/Users`;
 const API_LOGIN = `${API_ROOT}/api/gate/Login`;

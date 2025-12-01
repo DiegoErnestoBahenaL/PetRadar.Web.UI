@@ -87,7 +87,7 @@ export class LoginComponent implements OnInit {
         }
 
         this.mensajeInfo = 'Inicio de sesión exitoso.';
-        this.router.navigate(['/']); 
+        this.router.navigate(['/registro']); 
       },
       error: (err) => {
         this.cargando = false;
