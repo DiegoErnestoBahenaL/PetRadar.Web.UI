@@ -15,7 +15,8 @@
           formControlName="correo"
           placeholder="tucorreo@ejemplo.com"
         />
-        <div class="error-message" *ngIf="enviado && f['correo'].invalid">
+        <!-- ahora usamos touched + invalid, ya no 'enviado' -->
+        <div class="error-message" *ngIf="f['correo'].touched && f['correo'].invalid">
           <span *ngIf="f['correo'].errors?.['required']">
             El correo es obligatorio.
           </span>
@@ -37,7 +38,7 @@
         <div class="toggle-password" (click)="toggleMostrarPassword()">
           {{ mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }}
         </div>
-        <div class="error-message" *ngIf="enviado && f['password'].invalid">
+        <div class="error-message" *ngIf="f['password'].touched && f['password'].invalid">
           <span *ngIf="f['password'].errors?.['required']">
             La contraseña es obligatoria.
           </span>
@@ -45,12 +46,12 @@
       </div>
 
       <!-- Recordar correo -->
-    <div class="form-group" style="margin-bottom: 10px;">
-    <label class="checkbox-inline">
-        <input type="checkbox" formControlName="recordarCorreo" />
-        <span>Recordar correo en este dispositivo</span>
-    </label>
-    </div>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label class="checkbox-inline">
+          <input type="checkbox" formControlName="recordarCorreo" />
+          <span>Recordar correo en este dispositivo</span>
+        </label>
+      </div>
 
       <!-- Mensajes de error / info -->
       <div class="error-message" *ngIf="errorGeneral">
@@ -89,7 +90,7 @@
       <button
         type="button"
         class="btn-secondary"
-        (click)="mostrarRecuperacion()"
+        (click)="mostrarRecuperacionPassword()"
       >
         Olvidé mi contraseña
       </button>
