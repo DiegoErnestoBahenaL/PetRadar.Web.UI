@@ -15,17 +15,18 @@ import { AuthService, RegisterPayload } from '../auth.service';
 @Component({
   selector: 'app-register',
   standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class RegisterComponent implements OnInit {
   registroForm!: FormGroup;
-  enviado = false;
-  registroExitoso = false;
-  mensajeExito = '';
-  cargando = false;
+
   errorGeneral = '';
+  mensajeInfo = '';
+  cargando = false;
+  mostrarPassword = false;
+  mostrarConfirmarPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -49,7 +50,7 @@ export class RegisterComponent implements OnInit {
         telefono: [
           '',
           [
-            // patrón
+            // 10–15 dígitos
             Validators.pattern(/^\d{10,15}$/),
           ],
         ],
@@ -65,42 +66,63 @@ export class RegisterComponent implements OnInit {
     return this.registroForm.controls;
   }
 
-  passwordsIgualesValidator(group: AbstractControl): ValidationErrors | null {
-    const pass = group.get('password')?.value;
-    const confirm = group.get('confirmarPassword')?.value;
-    if (pass && confirm && pass !== confirm) {
-      group.get('confirmarPassword')?.setErrors({ passwordsNoCoinciden: true });
-      return { passwordsNoCoinciden: true };
+  toggleMostrarPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  toggleMostrarConfirmarPassword(): void {
+    this.mostrarConfirmarPassword = !this.mostrarConfirmarPassword;
+  }
+
+  private passwordsIgualesValidator(
+    group: AbstractControl
+  ): ValidationErrors | null {
+    const password = group.get('password');
+    const confirmarPassword = group.get('confirmarPassword');
+
+    if (!password || !confirmarPassword) {
+      return null;
     }
-    return null;
+
+    return password.value === confirmarPassword.value
+      ? null
+      : { passwordsNoCoinciden: true };
+  }
+
+  tieneErrorCampo(campo: string, tipoError: string): boolean {
+    const control = this.f[campo];
+    return !!(control && control.touched && control.hasError(tipoError));
   }
 
   onSubmit(): void {
-    this.enviado = true;
     this.errorGeneral = '';
-    this.mensajeExito = '';
+    this.mensajeInfo = '';
 
     if (this.registroForm.invalid) {
+      this.registroForm.markAllAsTouched();
+      this.errorGeneral = 'Por favor, corrige los errores en el formulario.';
       return;
     }
 
+    const formValue = this.registroForm.value;
+
     const payload: RegisterPayload = {
-      nombreCompleto: this.f['nombreCompleto'].value,
-      correo: this.f['correo'].value,
-      password: this.f['password'].value,
-      telefono: this.f['telefono'].value || null,
-      aceptaPrivacidad: this.f['aceptaPrivacidad'].value,
+      nombreCompleto: formValue['nombreCompleto'],
+      correo: formValue['correo'],
+      password: formValue['password'],
+      telefono: formValue['telefono'] || null,
+      aceptaPrivacidad: formValue['aceptaPrivacidad'],
     };
 
     this.cargando = true;
+
     this.authService.registrar(payload).subscribe({
       next: () => {
         this.cargando = false;
-        this.registroExitoso = true;
-        this.mensajeExito =
-          'Tu cuenta ha sido creada. Te hemos enviado un correo para verificar tu cuenta.';
-        // limpieza de formulario
-        // this.registroForm.reset();
+        this.mensajeInfo =
+          'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.';
+        // para redirigir al login
+        // this.router.navigate(['/']);
       },
       error: (err) => {
         this.cargando = false;

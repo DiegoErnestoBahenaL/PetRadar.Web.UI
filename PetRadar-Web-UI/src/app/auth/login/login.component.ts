@@ -14,16 +14,16 @@ import { AuthService, LoginPayload } from '../auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
-  enviado = false;
-  cargando = false;
+
   errorGeneral = '';
   mensajeInfo = '';
+  cargando = false;
   mostrarPassword = false;
 
   // sección de recuperación
@@ -56,20 +56,16 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.enviado = true;
     this.errorGeneral = '';
     this.mensajeInfo = '';
-    this.mensajeRecuperacion = '';
 
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      this.errorGeneral = 'Por favor, completa correctamente el formulario.';
       return;
     }
 
-    const payload: LoginPayload = {
-      correo: this.f['correo'].value,
-      password: this.f['password'].value,
-      recordarCorreo: this.f['recordarCorreo'].value,
-    };
+    const payload: LoginPayload = this.loginForm.value as LoginPayload;
 
     // recordar/no recordar correo
     if (payload.recordarCorreo) {
@@ -97,7 +93,7 @@ export class LoginComponent implements OnInit {
         this.cargando = false;
         console.error(err);
 
-        if (err.message === 'CREDENCIALES_INVALIDAS') {
+        if (err?.message === 'CREDENCIALES_INVALIDAS') {
           this.errorGeneral = 'Correo o contraseña incorrectos.';
         } else {
           this.errorGeneral =
@@ -107,9 +103,9 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  // --- recuperación de contraseña ---
+  // RECUPERACION DE PASSWORD
 
-  mostrarRecuperacion(): void {
+  mostrarRecuperacionPassword(): void {
     this.mostrandoRecuperacion = true;
     this.mensajeRecuperacion = '';
     this.recuperacionCorreo = this.f['correo'].value || '';
@@ -121,19 +117,18 @@ export class LoginComponent implements OnInit {
   }
 
   enviarRecuperacion(): void {
-    if (
-      !this.recuperacionCorreo ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.recuperacionCorreo)
-    ) {
-      this.mensajeRecuperacion =
-        'Ingresa un correo válido para recuperar tu contraseña.';
+    this.mensajeRecuperacion = '';
+
+    const correo = this.recuperacionCorreo?.trim();
+    if (!correo) {
+      this.mensajeRecuperacion = 'Ingresa un correo válido.';
       return;
     }
 
-    this.authService.recuperarPassword(this.recuperacionCorreo).subscribe({
+    this.authService.recuperarPassword(correo).subscribe({
       next: () => {
         this.mensajeRecuperacion =
-          'Te hemos enviado un correo con instrucciones para recuperar tu contraseña.';
+          'Si el correo está registrado, te enviaremos instrucciones para recuperar tu contraseña.';
       },
       error: () => {
         this.mensajeRecuperacion =
