@@ -124,7 +124,7 @@ export class UserDialogComponent {
       organizationName: this.form.value.organizationName || null,
       organizationAddress: this.form.value.organizationAddress || null,
       organizationPhone: this.form.value.organizationPhone || null,
-      // role: undefined // opcional
+      // role: undefined 
     };
 
     this.usersApi.apiUsersIdPut(this.data.user.id!, payload).subscribe({

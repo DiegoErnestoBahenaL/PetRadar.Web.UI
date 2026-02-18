@@ -48,7 +48,7 @@ export class AuthService {
 registrar(payload: RegisterPayload): Observable<void> {
   const fullName = (payload.nombreCompleto ?? '').trim();
 
-  // separa nombre y apellido de forma simple
+  // separa nombre y apellido 
   const parts = fullName.split(/\s+/);
   const name = parts.shift() ?? '';
   const lastName = parts.length ? parts.join(' ') : null;

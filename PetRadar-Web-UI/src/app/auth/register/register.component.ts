@@ -121,16 +121,16 @@ export class RegisterComponent implements OnInit {
         this.cargando = false;
         this.mensajeInfo =
           'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.';
-        // para redirigir al login
+        // redirigir al login
          this.router.navigate(['/']);
       },
       error: (err) => {
       this.cargando = false;
 
       console.log('STATUS:', err.status);
-      console.log('BACKEND ERROR:', err.error); // <- aquí suele venir "errors" por campo
+      console.log('BACKEND ERROR:', err.error); 
 
-      // si viene estilo ASP.NET validation problem details
+      
       const backendMsg =
         err?.error?.title ||
         err?.error?.detail ||

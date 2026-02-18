@@ -60,7 +60,7 @@ export class PetDialogComponent {
     color: ['' as string | null],
     sex: [null as PetSexEnum | null],
     size: [null as PetSizeEnum | null],
-    birthDate: ['' as string | null],          // string ISO o yyyy-mm-dd (según backend)
+    birthDate: ['' as string | null],          // yyyy-mm-dd 
     approximateAge: [null as number | null],
     weight: [null as number | null],
     description: ['' as string | null],
@@ -91,8 +91,7 @@ export class PetDialogComponent {
         medicalNotes: data.pet.medicalNotes ?? null,
       });
 
-      // En update NO existe userId (según tu modelo), pero lo dejamos visible
-      // Si tu backend NO permite cambiar dueño, puedes deshabilitarlo:
+      
       this.form.controls.userId.disable();
     }
   }
