@@ -121,15 +121,24 @@ export class RegisterComponent implements OnInit {
         this.cargando = false;
         this.mensajeInfo =
           'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.';
-        // para redirigir al login
-        // this.router.navigate(['/']);
+        // redirigir al login
+         this.router.navigate(['/']);
       },
       error: (err) => {
-        this.cargando = false;
-        console.error(err);
-        this.errorGeneral =
-          'Ocurrió un error al registrar tu cuenta. Inténtalo más tarde.';
-      },
+      this.cargando = false;
+
+      console.log('STATUS:', err.status);
+      console.log('BACKEND ERROR:', err.error); 
+
+      
+      const backendMsg =
+        err?.error?.title ||
+        err?.error?.detail ||
+        (typeof err?.error === 'string' ? err.error : null);
+
+      this.errorGeneral = backendMsg ?? 'Ocurrió un error al registrar tu cuenta.';
+    }
+
     });
   }
 

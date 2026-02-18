@@ -1,0 +1,67 @@
+<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+  <h2 style="margin:0;">Mascotas</h2>
+
+  <div style="display:flex; gap:10px; align-items:center;">
+    <mat-form-field appearance="outline" style="width:260px;">
+      <mat-label>Buscar</mat-label>
+      <input matInput (input)="applyFilter($any($event.target).value)" />
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      Nueva
+    </button>
+  </div>
+</div>
+
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2" style="width:100%; margin-top:12px;">
+
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+    <td mat-cell *matCellDef="let p">{{ p.id }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="userId">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
+    <td mat-cell *matCellDef="let p">{{ p.userId }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+    <td mat-cell *matCellDef="let p">{{ p.name ?? '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="species">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Especie</th>
+    <td mat-cell *matCellDef="let p">{{ p.species ?? '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="sex">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Sexo</th>
+    <td mat-cell *matCellDef="let p">{{ p.sex ?? '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="size">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Tamaño</th>
+    <td mat-cell *matCellDef="let p">{{ p.size ?? '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+    <td mat-cell *matCellDef="let p" style="white-space:nowrap;">
+      <button mat-icon-button (click)="openEdit(p)" aria-label="Editar">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button (click)="delete(p)" aria-label="Eliminar">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+
+<mat-paginator [pageSize]="10" [pageSizeOptions]="[5,10,25,50]" showFirstLastButtons></mat-paginator>
