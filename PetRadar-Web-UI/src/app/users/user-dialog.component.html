@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>{{ data.mode === 'create' ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
+
+<div mat-dialog-content>
+  <form [formGroup]="form" style="display:flex; flex-direction:column; gap:12px; padding-top:8px;">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" />
+      <mat-error *ngIf="form.controls.email.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.controls.email.hasError('email')">Email inválido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" formControlName="password" />
+      <mat-hint *ngIf="data.mode === 'edit'">Déjalo vacío si no vas a cambiarla</mat-hint>
+      <mat-error *ngIf="data.mode === 'create' && form.controls.password.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.controls.password.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" />
+      <mat-error *ngIf="form.controls.name.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.controls.name.hasError('minlength')">Mínimo 2 caracteres</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Apellido</mat-label>
+      <input matInput formControlName="lastName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phoneNumber" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Foto (URL)</mat-label>
+      <input matInput formControlName="profilePhotoURL" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Organización</mat-label>
+      <input matInput formControlName="organizationName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Dirección organización</mat-label>
+      <input matInput formControlName="organizationAddress" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono organización</mat-label>
+      <input matInput formControlName="organizationPhone" />
+    </mat-form-field>
+
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="close()" [disabled]="saving">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving">
+    {{ saving ? 'Guardando...' : 'Guardar' }}
+  </button>
+</div>
