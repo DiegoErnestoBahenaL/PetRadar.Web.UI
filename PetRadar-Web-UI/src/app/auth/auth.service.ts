@@ -46,18 +46,24 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
 registrar(payload: RegisterPayload): Observable<void> {
-  const body: BackendCreateUserRequest = {
-    email: payload.correo,
+  const fullName = (payload.nombreCompleto ?? '').trim();
+
+  // separa nombre y apellido 
+  const parts = fullName.split(/\s+/);
+  const name = parts.shift() ?? '';
+  const lastName = parts.length ? parts.join(' ') : null;
+
+  const body = {
+    email: payload.correo.trim(),
     password: payload.password,
-    name: payload.nombreCompleto,
-    lastName: '',
-    phoneNumber: payload.telefono ?? ''
+    name,                       // requerido
+    lastName,                   // null si no hay
+    phoneNumber: payload.telefono?.trim() ? payload.telefono.trim() : null
   };
 
-  return this.http.post<User>(API_USERS, body).pipe(
-    map(() => void 0)
-  );
+  return this.http.post(API_USERS, body).pipe(map(() => void 0));
 }
+
 
 login(payload: LoginPayload): Observable<{ token: string; requiereVerificacion?: boolean }> {
   const body = {
