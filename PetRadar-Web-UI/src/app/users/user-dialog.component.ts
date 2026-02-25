@@ -1,7 +1,7 @@
 import { Component, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
+import { RoleEnum } from '../api/petradar/model/roleEnum';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -99,6 +99,7 @@ export class UserDialogComponent {
         organizationAddress: this.form.value.organizationAddress || null,
         organizationPhone: this.form.value.organizationPhone || null,
         // role: undefined // NOTA
+        role: RoleEnum.User,
       };
 
       this.usersApi.apiUsersPost(payload).subscribe({
