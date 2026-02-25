@@ -17,8 +17,8 @@ export const routes: Routes = [
     component: DashboardLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'users', component: UsersPageComponent },
-      { path: 'pets', component: UserPetsPageComponent },
+      { path: 'pets', component: UserPetsPageComponent, canActivate: [authGuard] },
+      { path: 'users', component: UsersPageComponent, canActivate: [authGuard] },
       { path: '', pathMatch: 'full', redirectTo: 'users' },
     ],
   },
