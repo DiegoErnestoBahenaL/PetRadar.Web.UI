@@ -11,7 +11,7 @@ export const routes: Routes = [
   { path: '', component: LoginComponent },
   { path: 'registro', component: RegisterComponent },
 
-  // Private (dashboard)
+  // Private 
   {
     path: 'app',
     component: DashboardLayoutComponent,
