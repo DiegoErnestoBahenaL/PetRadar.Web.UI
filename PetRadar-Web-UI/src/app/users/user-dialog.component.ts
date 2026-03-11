@@ -1,17 +1,12 @@
-import { Component, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RoleEnum } from '../api/petradar/model/roleEnum';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { UsersService } from '../api/petradar/api/users.service';
 import { UserCreateModel } from '../api/petradar/model/userCreateModel';
 import { UserUpdateModel } from '../api/petradar/model/userUpdateModel';
 import { UserViewModel } from '../api/petradar/model/userViewModel';
+import { RoleEnum } from '../api/petradar/model/roleEnum';
 
 export type UserDialogData =
   | { mode: 'create' }
@@ -20,30 +15,34 @@ export type UserDialogData =
 @Component({
   selector: 'app-user-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSnackBarModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './user-dialog.component.html',
 })
 export class UserDialogComponent {
   private fb = inject(FormBuilder);
   private usersApi = inject(UsersService);
-  private snack = inject(MatSnackBar);
+
+  @Input() open = false;
+
+  @Input() set data(value: UserDialogData | null) {
+    this._data = value;
+    this.initFromData();
+  }
+  get data() {
+    return this._data;
+  }
+  private _data: UserDialogData | null = null;
+
+  @Output() closed = new EventEmitter<boolean>();
 
   saving = false;
+  errorMsg: string | null = null;
 
-  
-  // Create: email, password, name 
-  // Update: todos opcionales
+  // Create: email, password, name (required)
+  // Update: opcionales (password opcional)
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: [''], // required SOLO en create 
+    password: [''], // required solo en create
     name: ['', [Validators.required, Validators.minLength(2)]],
     lastName: [''],
     phoneNumber: [''],
@@ -53,89 +52,105 @@ export class UserDialogComponent {
     organizationPhone: [''],
   });
 
-  constructor(
-    private ref: MatDialogRef<UserDialogComponent, boolean>,
-    @Inject(MAT_DIALOG_DATA) public data: UserDialogData
-  ) {
-    if (data.mode === 'edit') {
-      // Password no obligatorio en edit
+  private initFromData() {
+    this.errorMsg = null;
+
+    // reset validators for password every time
+    this.form.controls.password.clearValidators();
+    this.form.controls.password.setValue('');
+    this.form.controls.password.updateValueAndValidity({ emitEvent: false });
+
+    if (!this._data) return;
+
+    if (this._data.mode === 'edit') {
+      const u = this._data.user;
       this.form.patchValue({
-        email: data.user.email ?? '',
-        name: data.user.name ?? '',
-        lastName: data.user.lastName ?? '',
-        phoneNumber: data.user.phoneNumber ?? '',
-        profilePhotoURL: data.user.profilePhotoURL ?? '',
-        organizationName: (data.user as any).organizationName ?? '',
-        organizationAddress: (data.user as any).organizationAddress ?? '',
-        organizationPhone: (data.user as any).organizationPhone ?? '',
+        email: u.email ?? '',
+        name: (u as any).name ?? (u as any).firstName ?? '',
+        lastName: u.lastName ?? '',
+        phoneNumber: u.phoneNumber ?? '',
+        profilePhotoURL: u.profilePhotoURL ?? '',
+        organizationName: (u as any).organizationName ?? '',
+        organizationAddress: (u as any).organizationAddress ?? '',
+        organizationPhone: (u as any).organizationPhone ?? '',
       });
-    } else {
-      // Password obligatorio en create
-      this.form.controls.password.addValidators([Validators.required, Validators.minLength(6)]);
-      this.form.controls.password.updateValueAndValidity();
+
+      // this.form.controls.email.disable();
+      this.form.controls.email.enable();
+      return;
     }
+
+    // create mode
+    this.form.reset();
+    this.form.controls.email.enable();
+
+    this.form.controls.password.addValidators([Validators.required, Validators.minLength(6)]);
+    this.form.controls.password.updateValueAndValidity({ emitEvent: false });
   }
 
-  close(): void {
-    this.ref.close(false);
+  close(ok: boolean = false): void {
+    if (this.saving) return;
+    this.closed.emit(ok);
   }
 
   save(): void {
+    if (!this._data) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.saving = true;
+    this.errorMsg = null;
 
-    if (this.data.mode === 'create') {
+    if (this._data.mode === 'create') {
       const payload: UserCreateModel = {
         email: this.form.value.email!,
-        password: this.form.value.password!, 
+        password: this.form.value.password!,
         name: this.form.value.name!,
         lastName: this.form.value.lastName || null,
         phoneNumber: this.form.value.phoneNumber || null,
         organizationName: this.form.value.organizationName || null,
         organizationAddress: this.form.value.organizationAddress || null,
         organizationPhone: this.form.value.organizationPhone || null,
-        // role: undefined // NOTA
         role: RoleEnum.User,
       };
 
       this.usersApi.apiUsersPost(payload).subscribe({
         next: () => {
           this.saving = false;
-          this.ref.close(true);
+          this.close(true);
         },
         error: (err) => {
           this.saving = false;
-          this.snack.open(err?.message ?? 'Error creando usuario', 'OK', { duration: 3500 });
+          this.errorMsg = err?.message ?? 'Error creando usuario';
         },
       });
 
       return;
     }
 
+    const id = this._data.user.id!;
     const payload: UserUpdateModel = {
       email: this.form.value.email || null,
-      password: this.form.value.password || null, 
+      password: this.form.value.password || null,
       name: this.form.value.name || null,
       lastName: this.form.value.lastName || null,
       phoneNumber: this.form.value.phoneNumber || null,
       organizationName: this.form.value.organizationName || null,
       organizationAddress: this.form.value.organizationAddress || null,
       organizationPhone: this.form.value.organizationPhone || null,
-      // role: undefined 
     };
 
-    this.usersApi.apiUsersIdPut(this.data.user.id!, payload).subscribe({
+    this.usersApi.apiUsersIdPut(id, payload).subscribe({
       next: () => {
         this.saving = false;
-        this.ref.close(true);
+        this.close(true);
       },
       error: (err) => {
         this.saving = false;
-        this.snack.open(err?.message ?? 'Error actualizando usuario', 'OK', { duration: 3500 });
+        this.errorMsg = err?.message ?? 'Error actualizando usuario';
       },
     });
   }
