@@ -1,49 +1,119 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [
-    RouterModule,
-    MatSidenavModule,
-    MatToolbarModule,
-    MatListModule,
-    MatButtonModule,
-  ],
+  imports: [RouterModule],
   template: `
-    <mat-sidenav-container style="height: 100vh;">
-      <mat-sidenav mode="side" opened>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/app/users">Usuarios</a>
-          <a mat-list-item routerLink="/app/pets">Mascotas</a>
-        </mat-nav-list>
-      </mat-sidenav>
+  <div class="app-wrapper">
+    <!-- Header -->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <div class="container-fluid">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <!-- AdminLTE 4 sidebar toggle -->
+            <button
+              type="button"
+              class="nav-link btn btn-link px-2"
+              (click)="toggleSidebar()">
+              <i class="fas fa-bars"></i>
+            </button>
+          </li>
 
-      <mat-sidenav-content>
-        <mat-toolbar>
-          <span>PetRadar</span>
-          <span style="flex: 1 1 auto;"></span>
-          <button mat-button (click)="logout()">Salir</button>
-        </mat-toolbar>
+          <li class="nav-item d-none d-md-block">
+            <a class="nav-link fw-semibold" routerLink="/app/users">PetRadar</a>
+          </li>
+        </ul>
 
-        <div style="padding: 16px;">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button type="button" class="btn btn-outline-danger btn-sm" (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+      <div class="sidebar-brand">
+        <a class="brand-link" routerLink="/app/users">
+          <span class="brand-text fw-light">PetRadar</span>
+        </a>
+      </div>
+
+      <div class="sidebar-wrapper">
+        <nav class="mt-2">
+          <ul class="nav sidebar-menu flex-column" role="menu" data-lte-toggle="treeview" data-accordion="false">
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/app/users" routerLinkActive="active">
+                <i class="nav-icon fas fa-users"></i>
+                <p>Usuarios</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/app/pets" routerLinkActive="active">
+                <i class="nav-icon fas fa-paw"></i>
+                <p>Mascotas</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+      <!--<div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0">Panel</h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-end mb-0">
+                <li class="breadcrumb-item"><a routerLink="/app/users">Inicio</a></li>
+                <li class="breadcrumb-item active">Panel</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>-->
+
+      <div class="app-content">
+        <div class="container-fluid">
           <router-outlet></router-outlet>
         </div>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
-  `
-})
-export class DashboardLayoutComponent {
-  constructor(private auth: AuthService) {}
+      </div>
+    </main>
 
-  logout() {
+    <!-- <footer class="app-footer">
+      <strong>PetRadar</strong>
+    </footer>-->
+  </div>
+`,
+})
+export class DashboardLayoutComponent implements OnInit, OnDestroy {
+  constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    // AdminLTE 4: layout-fixed + sidebar-expand-lg son claves
+    document.body.classList.add('layout-fixed', 'sidebar-expand-lg', 'bg-body-tertiary');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('layout-fixed', 'sidebar-expand-lg', 'bg-body-tertiary');
+  }
+
+  logout(): void {
     this.auth.logout();
-    location.href = '/'; // vuelve al login
+    this.router.navigateByUrl('/');
+  }
+  toggleSidebar() {
+    document.body.classList.toggle('sidebar-collapse');
   }
 }

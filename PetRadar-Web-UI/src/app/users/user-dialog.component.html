@@ -1,66 +1,117 @@
-<h2 mat-dialog-title>{{ data.mode === 'create' ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
+<div *ngIf="open">
+  <div class="modal-backdrop fade show"></div>
 
-<div mat-dialog-content>
-  <form [formGroup]="form" style="display:flex; flex-direction:column; gap:12px; padding-top:8px;">
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" />
-      <mat-error *ngIf="form.controls.email.hasError('required')">Requerido</mat-error>
-      <mat-error *ngIf="form.controls.email.hasError('email')">Email inválido</mat-error>
-    </mat-form-field>
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-user me-2"></i>
+            {{ data?.mode === 'create' ? 'Nuevo usuario' : 'Editar usuario' }}
+          </h5>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Contraseña</mat-label>
-      <input matInput type="password" formControlName="password" />
-      <mat-hint *ngIf="data.mode === 'edit'">Déjalo vacío si no vas a cambiarla</mat-hint>
-      <mat-error *ngIf="data.mode === 'create' && form.controls.password.hasError('required')">Requerido</mat-error>
-      <mat-error *ngIf="form.controls.password.hasError('minlength')">Mínimo 6 caracteres</mat-error>
-    </mat-form-field>
+          <button type="button" class="btn-close" aria-label="Close"
+                  (click)="close(false)" [disabled]="saving"></button>
+        </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Nombre</mat-label>
-      <input matInput formControlName="name" />
-      <mat-error *ngIf="form.controls.name.hasError('required')">Requerido</mat-error>
-      <mat-error *ngIf="form.controls.name.hasError('minlength')">Mínimo 2 caracteres</mat-error>
-    </mat-form-field>
+        <div class="modal-body">
+          <div *ngIf="errorMsg" class="alert alert-danger mb-3">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {{ errorMsg }}
+          </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Apellido</mat-label>
-      <input matInput formControlName="lastName" />
-    </mat-form-field>
+          <form [formGroup]="form">
+            <div class="row g-3">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Teléfono</mat-label>
-      <input matInput formControlName="phoneNumber" />
-    </mat-form-field>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input class="form-control" formControlName="email" />
+                <div class="text-danger small mt-1"
+                     *ngIf="form.controls.email.touched && form.controls.email.hasError('required')">
+                  Requerido
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.controls.email.touched && form.controls.email.hasError('email')">
+                  Email inválido
+                </div>
+              </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Foto (URL)</mat-label>
-      <input matInput formControlName="profilePhotoURL" />
-    </mat-form-field>
+              <div class="col-md-6">
+                <label class="form-label">Contraseña</label>
+                <input type="password" class="form-control" formControlName="password" />
+                <div class="text-muted small mt-1" *ngIf="data?.mode === 'edit'">
+                  Déjalo vacío si no vas a cambiarla
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="data?.mode === 'create' && form.controls.password.touched && form.controls.password.hasError('required')">
+                  Requerido
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.controls.password.touched && form.controls.password.hasError('minlength')">
+                  Mínimo 6 caracteres
+                </div>
+              </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Organización</mat-label>
-      <input matInput formControlName="organizationName" />
-    </mat-form-field>
+              <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input class="form-control" formControlName="name" />
+                <div class="text-danger small mt-1"
+                     *ngIf="form.controls.name.touched && form.controls.name.hasError('required')">
+                  Requerido
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.controls.name.touched && form.controls.name.hasError('minlength')">
+                  Mínimo 2 caracteres
+                </div>
+              </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Dirección organización</mat-label>
-      <input matInput formControlName="organizationAddress" />
-    </mat-form-field>
+              <div class="col-md-6">
+                <label class="form-label">Apellido</label>
+                <input class="form-control" formControlName="lastName" />
+              </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Teléfono organización</mat-label>
-      <input matInput formControlName="organizationPhone" />
-    </mat-form-field>
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input class="form-control" formControlName="phoneNumber" />
+              </div>
 
-  </form>
-</div>
+              <div class="col-md-6">
+                <label class="form-label">Foto (URL)</label>
+                <input class="form-control" formControlName="profilePhotoURL" />
+              </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-button (click)="close()" [disabled]="saving">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving">
-    {{ saving ? 'Guardando...' : 'Guardar' }}
-  </button>
+              <div class="col-md-6">
+                <label class="form-label">Organización</label>
+                <input class="form-control" formControlName="organizationName" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Dirección organización</label>
+                <input class="form-control" formControlName="organizationAddress" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Teléfono organización</label>
+                <input class="form-control" formControlName="organizationPhone" />
+              </div>
+
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" (click)="close(false)" [disabled]="saving">
+            Cancelar
+          </button>
+
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            {{ saving ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>
