@@ -11,14 +11,14 @@ export const routes: Routes = [
   { path: '', component: LoginComponent },
   { path: 'registro', component: RegisterComponent },
 
-  // Private (dashboard)
+  // Private 
   {
     path: 'app',
     component: DashboardLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'users', component: UsersPageComponent },
-      { path: 'pets', component: UserPetsPageComponent },
+      { path: 'pets', component: UserPetsPageComponent, canActivate: [authGuard] },
+      { path: 'users', component: UsersPageComponent, canActivate: [authGuard] },
       { path: '', pathMatch: 'full', redirectTo: 'users' },
     ],
   },

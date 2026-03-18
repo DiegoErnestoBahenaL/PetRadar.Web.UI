@@ -1,14 +1,6 @@
-import { Component, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { UserPetsService } from '../api/petradar/api/userPets.service';
 import { UserPetCreateModel } from '../api/petradar/model/userPetCreateModel';
@@ -19,6 +11,8 @@ import { PetSpeciesEnum } from '../api/petradar/model/petSpeciesEnum';
 import { PetSexEnum } from '../api/petradar/model/petSexEnum';
 import { PetSizeEnum } from '../api/petradar/model/petSizeEnum';
 
+import { ViewChild, ElementRef } from '@angular/core';
+
 export type PetDialogData =
   | { mode: 'create' }
   | { mode: 'edit'; pet: UserPetViewModel };
@@ -26,32 +20,51 @@ export type PetDialogData =
 @Component({
   selector: 'app-pet-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSnackBarModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './pet-dialog.component.html',
 })
 export class PetDialogComponent {
+
+  @ViewChild('basic') basicDetails!: ElementRef<HTMLDetailsElement>;
+  @ViewChild('physical') physicalDetails!: ElementRef<HTMLDetailsElement>;
+  @ViewChild('health') healthDetails!: ElementRef<HTMLDetailsElement>;
+  onSectionToggle(section: 'basic' | 'physical' | 'health', isOpen: boolean) {
+    // se abre una sección
+    if (!isOpen) return;
+
+    const all = {
+      basic: this.basicDetails?.nativeElement,
+      physical: this.physicalDetails?.nativeElement,
+      health: this.healthDetails?.nativeElement,
+    };
+
+    Object.entries(all).forEach(([key, el]) => {
+      if (!el) return;
+      if (key !== section) el.open = false; // ccerrar pestañas
+    });
+  }
+
   private fb = inject(FormBuilder);
   private petsApi = inject(UserPetsService);
-  private snack = inject(MatSnackBar);
+
+  @Input() open = false;
+  @Input() set data(value: PetDialogData | null) {
+    this._data = value;
+    this.initFromData();
+  }
+  get data() { return this._data; }
+  private _data: PetDialogData | null = null;
+
+  @Output() closed = new EventEmitter<boolean>();
 
   saving = false;
+  errorMsg: string | null = null;
 
   speciesOptions = Object.values(PetSpeciesEnum);
   sexOptions = Object.values(PetSexEnum);
   sizeOptions = Object.values(PetSizeEnum);
 
   form = this.fb.group({
-    // create requiere userId
     userId: [null as number | null, [Validators.required]],
     name: ['', [Validators.required, Validators.minLength(2)]],
     species: [null as PetSpeciesEnum | null, [Validators.required]],
@@ -60,7 +73,7 @@ export class PetDialogComponent {
     color: ['' as string | null],
     sex: [null as PetSexEnum | null],
     size: [null as PetSizeEnum | null],
-    birthDate: ['' as string | null],          // yyyy-mm-dd 
+    birthDate: ['' as string | null],
     approximateAge: [null as number | null],
     weight: [null as number | null],
     description: ['' as string | null],
@@ -69,102 +82,98 @@ export class PetDialogComponent {
     medicalNotes: ['' as string | null],
   });
 
-  constructor(
-    private ref: MatDialogRef<PetDialogComponent, boolean>,
-    @Inject(MAT_DIALOG_DATA) public data: PetDialogData
-  ) {
-    if (data.mode === 'edit') {
+  private initFromData() {
+    this.errorMsg = null;
+
+    if (!this._data) return;
+
+    if (this._data.mode === 'edit') {
+      const pet = this._data.pet;
       this.form.patchValue({
-        userId: data.pet.userId ?? null,
-        name: data.pet.name ?? '',
-        species: (data.pet as any).species ?? null,
-        breed: data.pet.breed ?? null,
-        color: data.pet.color ?? null,
-        sex: (data.pet as any).sex ?? null,
-        size: (data.pet as any).size ?? null,
-        birthDate: data.pet.birthDate ?? null,
-        approximateAge: data.pet.approximateAge ?? null,
-        weight: data.pet.weight ?? null,
-        description: data.pet.description ?? null,
-        isNeutered: data.pet.isNeutered ?? null,
-        allergies: data.pet.allergies ?? null,
-        medicalNotes: data.pet.medicalNotes ?? null,
+        userId: pet.userId ?? null,
+        name: pet.name ?? '',
+        species: (pet as any).species ?? null,
+        breed: pet.breed ?? null,
+        color: pet.color ?? null,
+        sex: (pet as any).sex ?? null,
+        size: (pet as any).size ?? null,
+        birthDate: pet.birthDate ?? null,
+        approximateAge: pet.approximateAge ?? null,
+        weight: pet.weight ?? null,
+        description: pet.description ?? null,
+        isNeutered: pet.isNeutered ?? null,
+        allergies: pet.allergies ?? null,
+        medicalNotes: pet.medicalNotes ?? null,
       });
 
-      
       this.form.controls.userId.disable();
+    } else {
+      this.form.reset({ isNeutered: false });
+      this.form.controls.userId.enable();
     }
   }
 
-  close(): void {
-    this.ref.close(false);
+  close(ok: boolean = false) {
+    if (this.saving) return;
+    this.closed.emit(ok);
   }
 
-  save(): void {
+  save() {
+    if (!this._data) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.saving = true;
+    this.errorMsg = null;
 
-    if (this.data.mode === 'create') {
+    if (this._data.mode === 'create') {
       const payload: UserPetCreateModel = {
-        userId: this.form.value.userId!,
-        name: this.form.value.name!,
-        species: this.form.value.species!,
-        breed: this.form.value.breed ?? null,
-        color: this.form.value.color ?? null,
-        sex: this.form.value.sex ?? undefined,
-        size: this.form.value.size ?? undefined,
-        birthDate: this.form.value.birthDate ?? null,
-        approximateAge: this.form.value.approximateAge ?? null,
-        weight: this.form.value.weight ?? null,
-        description: this.form.value.description ?? null,
-        isNeutered: this.form.value.isNeutered ?? null,
-        allergies: this.form.value.allergies ?? null,
-        medicalNotes: this.form.value.medicalNotes ?? null,
+        userId: this.form.getRawValue().userId!,
+        name: this.form.getRawValue().name!,
+        species: this.form.getRawValue().species!,
+        breed: this.form.getRawValue().breed ?? null,
+        color: this.form.getRawValue().color ?? null,
+        sex: this.form.getRawValue().sex ?? undefined,
+        size: this.form.getRawValue().size ?? undefined,
+        birthDate: this.form.getRawValue().birthDate ?? null,
+        approximateAge: this.form.getRawValue().approximateAge ?? null,
+        weight: this.form.getRawValue().weight ?? null,
+        description: this.form.getRawValue().description ?? null,
+        isNeutered: this.form.getRawValue().isNeutered ?? null,
+        allergies: this.form.getRawValue().allergies ?? null,
+        medicalNotes: this.form.getRawValue().medicalNotes ?? null,
       };
 
       this.petsApi.apiUserPetsPost(payload).subscribe({
-        next: () => {
-          this.saving = false;
-          this.ref.close(true);
-        },
-        error: (err) => {
-          this.saving = false;
-          this.snack.open(err?.message ?? 'No se pudo crear', 'OK', { duration: 3500 });
-        },
+        next: () => { this.saving = false; this.close(true); },
+        error: (err) => { this.saving = false; this.errorMsg = err?.message ?? 'No se pudo crear'; },
       });
       return;
     }
 
-    const id = this.data.pet.id!;
+    const id = this._data.pet.id!;
     const payload: UserPetUpdateModel = {
-      name: this.form.value.name ?? null,
-      species: this.form.value.species ?? undefined,
-      breed: this.form.value.breed ?? null,
-      color: this.form.value.color ?? null,
-      sex: this.form.value.sex ?? undefined,
-      size: this.form.value.size ?? undefined,
-      birthDate: this.form.value.birthDate ?? null,
-      approximateAge: this.form.value.approximateAge ?? null,
-      weight: this.form.value.weight ?? null,
-      description: this.form.value.description ?? null,
-      isNeutered: this.form.value.isNeutered ?? null,
-      allergies: this.form.value.allergies ?? null,
-      medicalNotes: this.form.value.medicalNotes ?? null,
+      name: this.form.getRawValue().name ?? null,
+      species: this.form.getRawValue().species ?? undefined,
+      breed: this.form.getRawValue().breed ?? null,
+      color: this.form.getRawValue().color ?? null,
+      sex: this.form.getRawValue().sex ?? undefined,
+      size: this.form.getRawValue().size ?? undefined,
+      birthDate: this.form.getRawValue().birthDate ?? null,
+      approximateAge: this.form.getRawValue().approximateAge ?? null,
+      weight: this.form.getRawValue().weight ?? null,
+      description: this.form.getRawValue().description ?? null,
+      isNeutered: this.form.getRawValue().isNeutered ?? null,
+      allergies: this.form.getRawValue().allergies ?? null,
+      medicalNotes: this.form.getRawValue().medicalNotes ?? null,
     };
 
     this.petsApi.apiUserPetsIdPut(id, payload).subscribe({
-      next: () => {
-        this.saving = false;
-        this.ref.close(true);
-      },
-      error: (err) => {
-        this.saving = false;
-        this.snack.open(err?.message ?? 'No se pudo actualizar', 'OK', { duration: 3500 });
-      },
+      next: () => { this.saving = false; this.close(true); },
+      error: (err) => { this.saving = false; this.errorMsg = err?.message ?? 'No se pudo actualizar'; },
     });
   }
 }

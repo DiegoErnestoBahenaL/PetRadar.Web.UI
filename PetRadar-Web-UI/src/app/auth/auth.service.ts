@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { User } from './user.model';
+import { RoleEnum } from '../api/petradar/model/roleEnum';
 
 
 const API_ROOT = 'https://api-qa.petradar-qa.org';
@@ -58,7 +59,8 @@ registrar(payload: RegisterPayload): Observable<void> {
     password: payload.password,
     name,                       // requerido
     lastName,                   // null si no hay
-    phoneNumber: payload.telefono?.trim() ? payload.telefono.trim() : null
+    phoneNumber: payload.telefono?.trim() ? payload.telefono.trim() : null,
+    role: RoleEnum.User,
   };
 
   return this.http.post(API_USERS, body).pipe(map(() => void 0));
