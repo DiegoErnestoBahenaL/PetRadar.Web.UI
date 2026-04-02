@@ -1,94 +1,180 @@
-<h2 mat-dialog-title>{{ data.mode === 'create' ? 'Nueva mascota' : 'Editar mascota' }}</h2>
+<div *ngIf="open">
+  <!-- Backdrop -->
+  <div class="modal-backdrop fade show"></div>
 
-<div mat-dialog-content>
-  <form [formGroup]="form" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding-top:8px;">
+  <!-- Modal -->
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
 
-    <mat-form-field appearance="outline">
-      <mat-label>User ID</mat-label>
-      <input matInput type="number" formControlName="userId" />
-      <mat-error *ngIf="form.controls.userId.hasError('required')">Requerido</mat-error>
-    </mat-form-field>
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-paw me-2"></i>
+            {{ data?.mode === 'create' ? 'Nueva mascota' : 'Editar mascota' }}
+          </h5>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Nombre</mat-label>
-      <input matInput formControlName="name" />
-      <mat-error *ngIf="form.controls.name.hasError('required')">Requerido</mat-error>
-    </mat-form-field>
+          <button type="button" class="btn-close" aria-label="Close"
+                  (click)="close(false)" [disabled]="saving"></button>
+        </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Especie</mat-label>
-      <mat-select formControlName="species">
-        <mat-option *ngFor="let s of speciesOptions" [value]="s">{{ s }}</mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.controls.species.hasError('required')">Requerido</mat-error>
-    </mat-form-field>
+        <div class="modal-body">
+          <div *ngIf="errorMsg" class="alert alert-danger mb-3">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {{ errorMsg }}
+          </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Raza</mat-label>
-      <input matInput formControlName="breed" />
-    </mat-form-field>
+          <form [formGroup]="form">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Color</mat-label>
-      <input matInput formControlName="color" />
-    </mat-form-field>
+            <!-- Datos básicos -->
+            <details #basic open class="card mb-3" (toggle)="onSectionToggle('basic', basic.open)">
+              <summary class="card-header collapse-summary">
+                <span class="fw-semibold">Datos básicos</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+              </summary>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Sexo</mat-label>
-      <mat-select formControlName="sex">
-        <mat-option [value]="null">—</mat-option>
-        <mat-option *ngFor="let s of sexOptions" [value]="s">{{ s }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+              <div class="card-body">
+                <div class="row g-3">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Tamaño</mat-label>
-      <mat-select formControlName="size">
-        <mat-option [value]="null">—</mat-option>
-        <mat-option *ngFor="let s of sizeOptions" [value]="s">{{ s }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+                  <div class="col-md-6">
+                    <label class="form-label">User ID</label>
+                    <input type="number" class="form-control" formControlName="userId" />
+                    <div class="text-danger small mt-1"
+                         *ngIf="form.controls.userId.touched && form.controls.userId.hasError('required')">
+                      Requerido
+                    </div>
+                  </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Birth Date</mat-label>
-      <input matInput placeholder="YYYY-MM-DD" formControlName="birthDate" />
-    </mat-form-field>
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    <input class="form-control" formControlName="name" />
+                    <div class="text-danger small mt-1"
+                         *ngIf="form.controls.name.touched && form.controls.name.hasError('required')">
+                      Requerido
+                    </div>
+                  </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Edad aprox.</mat-label>
-      <input matInput type="number" formControlName="approximateAge" />
-    </mat-form-field>
+                  <div class="col-md-6">
+                    <label class="form-label">Especie</label>
+                    <select class="form-select" formControlName="species">
+                      <option [ngValue]="null">—</option>
+                      <option *ngFor="let s of speciesOptions" [ngValue]="s">{{ s }}</option>
+                    </select>
+                    <div class="text-danger small mt-1"
+                         *ngIf="form.controls.species.touched && form.controls.species.hasError('required')">
+                      Requerido
+                    </div>
+                  </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Peso</mat-label>
-      <input matInput type="number" formControlName="weight" />
-    </mat-form-field>
+                  <div class="col-md-6">
+                    <label class="form-label">Raza</label>
+                    <input class="form-control" formControlName="breed" />
+                  </div>
 
-    <mat-form-field appearance="outline" style="grid-column: 1 / -1;">
-      <mat-label>Descripción</mat-label>
-      <textarea matInput rows="3" formControlName="description"></textarea>
-    </mat-form-field>
+                  <div class="col-md-6">
+                    <label class="form-label">Sexo</label>
+                    <select class="form-select" formControlName="sex">
+                      <option [ngValue]="null">—</option>
+                      <option *ngFor="let s of sexOptions" [ngValue]="s">{{ s }}</option>
+                    </select>
+                  </div>
 
-    <mat-checkbox formControlName="isNeutered" style="grid-column: 1 / -1;">
-      Esterilizado(a)
-    </mat-checkbox>
+                  <div class="col-md-6">
+                    <label class="form-label">Tamaño</label>
+                    <select class="form-select" formControlName="size">
+                      <option [ngValue]="null">—</option>
+                      <option *ngFor="let s of sizeOptions" [ngValue]="s">{{ s }}</option>
+                    </select>
+                  </div>
 
-    <mat-form-field appearance="outline" style="grid-column: 1 / -1;">
-      <mat-label>Alergias</mat-label>
-      <input matInput formControlName="allergies" />
-    </mat-form-field>
+                </div>
+              </div>
+            </details>
 
-    <mat-form-field appearance="outline" style="grid-column: 1 / -1;">
-      <mat-label>Notas médicas</mat-label>
-      <textarea matInput rows="3" formControlName="medicalNotes"></textarea>
-    </mat-form-field>
+            <!-- Datos físicos -->
+            <details #physical class="card mb-3" (toggle)="onSectionToggle('physical', physical.open)">
+              <summary class="card-header collapse-summary">
+                <span class="fw-semibold">Datos físicos</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+              </summary>
 
-  </form>
-</div>
+              <div class="card-body">
+                <div class="row g-3">
 
-<div mat-dialog-actions align="end">
-  <button mat-button (click)="close()" [disabled]="saving">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving">
-    {{ saving ? 'Guardando...' : 'Guardar' }}
-  </button>
+                  <div class="col-md-6">
+                    <label class="form-label">Color</label>
+                    <input class="form-control" formControlName="color" />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Peso</label>
+                    <input type="number" class="form-control" formControlName="weight" />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Birth Date</label>
+                    <input type="date" class="form-control" formControlName="birthDate" />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Edad aprox.</label>
+                    <input type="number" class="form-control" formControlName="approximateAge" />
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <textarea rows="3" class="form-control" formControlName="description"></textarea>
+                  </div>
+
+                </div>
+              </div>
+            </details>
+
+            <!-- Salud -->
+            <details #health class="card mb-0" (toggle)="onSectionToggle('health', health.open)">
+              <summary class="card-header collapse-summary">
+                <span class="fw-semibold">Salud</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+              </summary>
+
+              <div class="card-body">
+                <div class="row g-3">
+
+                  <div class="col-12">
+                    <div class="form-check">
+                      <input id="isNeutered" type="checkbox" class="form-check-input" formControlName="isNeutered">
+                      <label class="form-check-label" for="isNeutered">Esterilizado(a)</label>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Alergias</label>
+                    <input class="form-control" formControlName="allergies" />
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Notas médicas</label>
+                    <textarea rows="3" class="form-control" formControlName="medicalNotes"></textarea>
+                  </div>
+
+                </div>
+              </div>
+            </details>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" (click)="close(false)" [disabled]="saving">
+            Cancelar
+          </button>
+
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            {{ saving ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>

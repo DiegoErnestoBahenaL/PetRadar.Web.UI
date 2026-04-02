@@ -1,67 +1,180 @@
-<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
-  <h2 style="margin:0;">Mascotas</h2>
+<!-- Toast simple -->
+<div *ngIf="toastMsg" class="alert mt-2"
+     [ngClass]="{
+       'alert-success': toastType === 'success',
+       'alert-warning': toastType === 'warning',
+       'alert-danger':  toastType === 'danger',
+       'alert-info':    toastType === 'info'
+     }">
+  {{ toastText }}
+</div>
 
-  <div style="display:flex; gap:10px; align-items:center;">
-    <mat-form-field appearance="outline" style="width:260px;">
-      <mat-label>Buscar</mat-label>
-      <input matInput (input)="applyFilter($any($event.target).value)" />
-    </mat-form-field>
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h3 class="card-title mb-0">Mascotas</h3>
 
-    <button mat-raised-button color="primary" (click)="openCreate()">
-      <mat-icon>add</mat-icon>
-      Nueva
-    </button>
+    <!-- AdminLTE style: tools -->
+    <div class="card-tools d-flex align-items-center" style="gap:10px;">
+      <div class="input-group input-group-sm" style="width: 300px;">
+        <input
+          class="form-control"
+          placeholder="Buscar"
+          [(ngModel)]="filter"
+          (input)="applyFilter()"
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          title="Limpiar"
+          (click)="filter=''; applyFilter()"
+          [disabled]="!filter"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <button class="btn btn-primary btn-sm" (click)="openCreate()">
+        <i class="fas fa-plus me-1"></i>
+        Nueva
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="px-3 py-2 border-bottom">
+    <div class="progress" style="height: 6px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped table-bordered align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="cursor:pointer;" (click)="toggleSort('id')">
+              ID
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'id',
+                   'fa-sort-up': sortKey === 'id' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'id' && sortDir === 'desc'
+                 }"></i>
+            </th>
+
+            <th style="cursor:pointer;" (click)="toggleSort('userId')">
+              Usuario
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'userId',
+                   'fa-sort-up': sortKey === 'userId' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'userId' && sortDir === 'desc'
+                 }"></i>
+            </th>
+
+            <th style="cursor:pointer;" (click)="toggleSort('name')">
+              Nombre
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'name',
+                   'fa-sort-up': sortKey === 'name' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'name' && sortDir === 'desc'
+                 }"></i>
+            </th>
+
+            <th style="cursor:pointer;" (click)="toggleSort('species')">
+              Especie
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'species',
+                   'fa-sort-up': sortKey === 'species' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'species' && sortDir === 'desc'
+                 }"></i>
+            </th>
+
+            <th style="cursor:pointer;" (click)="toggleSort('sex')">
+              Sexo
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'sex',
+                   'fa-sort-up': sortKey === 'sex' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'sex' && sortDir === 'desc'
+                 }"></i>
+            </th>
+
+            <th style="cursor:pointer;" (click)="toggleSort('size')">
+              Tamaño
+              <i class="fas ms-1"
+                 [ngClass]="{
+                   'fa-sort': sortKey !== 'size',
+                   'fa-sort-up': sortKey === 'size' && sortDir === 'asc',
+                   'fa-sort-down': sortKey === 'size' && sortDir === 'desc'
+                 }"></i>
+            </th>
+            <th style="width:140px;" class="text-end">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let p of pagedPets">
+            <td class="fw-semibold">{{ p.id }}</td>
+            <td>{{ p.userId }}</td>
+            <td>{{ p.name ?? '-' }}</td>
+            <td>{{ p.species ?? '-' }}</td>
+            <td>{{ p.sex ?? '-' }}</td>
+            <td>{{ p.size ?? '-' }}</td>
+
+            <td class="text-end text-nowrap">
+              <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-warning" (click)="openEdit(p)" title="Editar">
+                  <i class="fas fa-pen"></i>
+                </button>
+
+                <button class="btn btn-outline-danger" (click)="delete(p)" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && pagedPets.length === 0">
+            <td colspan="7" class="text-center p-4 text-muted">
+              <i class="fas fa-inbox me-2"></i> Sin resultados
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center" style="gap:10px;">
+      <span class="text-muted">
+        {{ totalItems }} registros • Página {{ page }} de {{ totalPages }}
+      </span>
+
+      <select class="form-select form-select-sm"
+              style="width: 90px;"
+              [ngModel]="pageSize"
+              (ngModelChange)="setPageSize($event)">
+        <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="page <= 1">
+        Anterior
+      </button>
+      <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page >= totalPages">
+        Siguiente
+      </button>
+    </div>
   </div>
 </div>
 
-<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-
-<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2" style="width:100%; margin-top:12px;">
-
-  <ng-container matColumnDef="id">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-    <td mat-cell *matCellDef="let p">{{ p.id }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="userId">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
-    <td mat-cell *matCellDef="let p">{{ p.userId }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
-    <td mat-cell *matCellDef="let p">{{ p.name ?? '-' }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="species">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Especie</th>
-    <td mat-cell *matCellDef="let p">{{ p.species ?? '-' }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="sex">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Sexo</th>
-    <td mat-cell *matCellDef="let p">{{ p.sex ?? '-' }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="size">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Tamaño</th>
-    <td mat-cell *matCellDef="let p">{{ p.size ?? '-' }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>Acciones</th>
-    <td mat-cell *matCellDef="let p" style="white-space:nowrap;">
-      <button mat-icon-button (click)="openEdit(p)" aria-label="Editar">
-        <mat-icon>edit</mat-icon>
-      </button>
-      <button mat-icon-button (click)="delete(p)" aria-label="Eliminar">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-</table>
-
-<mat-paginator [pageSize]="10" [pageSizeOptions]="[5,10,25,50]" showFirstLastButtons></mat-paginator>
+<!-- Modal -->
+<app-pet-dialog
+  [open]="modalOpen"
+  [data]="modalData"
+  (closed)="onPetDialogClosed($event)">
+</app-pet-dialog>
