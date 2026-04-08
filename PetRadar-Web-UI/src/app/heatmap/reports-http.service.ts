@@ -7,7 +7,7 @@ import { ReportViewModel } from './report.model';
 export class ReportsHttpService {
   private http = inject(HttpClient);
 
-  // Ajusta esto si ya usan environment.apiUrl
+  
   private readonly baseUrl = 'https://api-qa.petradar-qa.org';
 
   getReports(): Observable<ReportViewModel[]> {
