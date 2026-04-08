@@ -61,6 +61,12 @@ import { AuthService } from '../auth/auth.service';
                 <p>Mascotas</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a routerLink="/app/heatmap" routerLinkActive="active" class="nav-link">
+                <i class="nav-icon fas fa-fire"></i>
+                <p>Mapa de calor</p>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
