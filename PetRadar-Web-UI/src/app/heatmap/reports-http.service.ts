@@ -13,4 +13,8 @@ export class ReportsHttpService {
   getReports(): Observable<ReportViewModel[]> {
     return this.http.get<ReportViewModel[]>(`${this.baseUrl}/api/Reports`);
   }
+
+  getReportById(id: number): Observable<ReportViewModel> {
+    return this.http.get<ReportViewModel>(`${this.baseUrl}/api/Reports/${id}`);
+  }
 }

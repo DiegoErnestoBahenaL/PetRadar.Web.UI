@@ -88,7 +88,97 @@
             {{ filteredReports.length }} reportes
           </span>
         </div>
+        <div class="col-12 col-xl-9">
+  <div class="card shadow-sm heatmap-card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Mapa de calor ZMG</h5>
+      <span class="badge text-bg-secondary">{{ filteredReports.length }} reportes</span>
+    </div>
 
+    <div class="card-body p-0">
+      <div *ngIf="isLoading" class="p-4 text-center text-muted">Cargando reportes...</div>
+      <div *ngIf="loadError" class="alert alert-danger m-3">{{ loadError }}</div>
+      <div #mapContainer class="heatmap-container" [class.d-none]="isLoading || !!loadError"></div>
+    </div>
+    <div class="d-flex justify-content-end mt-2">
+        <button
+            *ngIf="selectedReportId"
+            class="btn btn-primary btn-sm"
+            (click)="openSelectedReportDetail()"
+        >
+            Abrir reporte seleccionado
+        </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm heatmap-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Reportes filtrados</h5>
+      <span class="badge text-bg-light border">{{ filteredReports.length }} encontrados</span>
+    </div>
+
+    <div class="card-body p-0">
+      <div *ngIf="!filteredReports.length" class="p-4 text-center text-muted">
+        No hay reportes que coincidan con los filtros actuales.
+      </div>
+
+      <div *ngIf="filteredReports.length" class="table-responsive">
+        <table class="table table-hover table-striped table-bordered align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Especie</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Ubicación</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+                *ngFor="let report of filteredReports"
+                (click)="onReportSelected(report)"
+                style="cursor: pointer"
+                [class.table-primary]="report.id === selectedReportId"
+            >
+              <td>
+                <span class="fw-semibold">#{{ report.id }}</span>
+              </td>
+
+              <td>{{ getReportTypeLabel(report.reportType) }}
+
+              </td>
+
+              <td>{{ report.species || 'N/D' }}</td>
+
+              <td>
+                <span class="badge rounded-pill text-bg-secondary">
+                  {{ getReportStatusLabel(report.reportStatus) }}
+                </span>
+              </td>
+
+              <td>{{ formatDate(report.incidentDate) }}</td>
+
+              <td class="text-truncate report-location-cell">
+                {{ getShortLocation(report) }}
+              </td>
+              <td class="text-center">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="openReportDetail(report)"
+                >
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
         <div class="card-body p-0">
           <div #mapContainer class="heatmap-container"></div>
         </div>
