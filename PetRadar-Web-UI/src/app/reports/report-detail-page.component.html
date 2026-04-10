@@ -1,0 +1,122 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Detalle del reporte</h3>
+    <button class="btn btn-outline-secondary" (click)="goBack()">
+      Regresar
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="card shadow-sm">
+    <div class="card-body text-center text-muted py-4">
+      Cargando detalle del reporte...
+    </div>
+  </div>
+
+  <div *ngIf="loadError" class="alert alert-danger">
+    {{ loadError }}
+  </div>
+
+  <div *ngIf="report && !isLoading" class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Reporte #{{ report.id }}</h5>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <strong>Tipo:</strong>
+              <div>{{ getReportTypeLabel(report.reportType) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Estado:</strong>
+              <div>{{ getReportStatusLabel(report.reportStatus) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Especie:</strong>
+              <div>{{ getValue(report.species) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Raza:</strong>
+              <div>{{ getValue(report.breed) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Color:</strong>
+              <div>{{ getValue(report.color) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Sexo:</strong>
+              <div>{{ getValue(report.sex) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Tamaño:</strong>
+              <div>{{ getValue(report.size) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Edad aproximada:</strong>
+              <div>{{ getValue(report.approximateAge) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Peso:</strong>
+              <div>{{ getValue(report.weight) }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <strong>Fecha del incidente:</strong>
+              <div>{{ formatDate(report.incidentDate) }}</div>
+            </div>
+
+            <div class="col-12">
+              <strong>Ubicación:</strong>
+              <div>{{ getLocation() }}</div>
+            </div>
+
+            <div class="col-12">
+              <strong>Descripción:</strong>
+              <div class="detail-box">{{ getValue(report.description) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Datos técnicos</h5>
+        </div>
+
+        <div class="card-body">
+          <p><strong>ID:</strong> {{ report.id }}</p>
+          <p><strong>User ID:</strong> {{ getValue(report.userId) }}</p>
+          <p><strong>User Pet ID:</strong> {{ getValue(report.userPetId) }}</p>
+          <p><strong>Latitud:</strong> {{ getValue(report.latitude) }}</p>
+          <p><strong>Longitud:</strong> {{ getValue(report.longitude) }}</p>
+          
+          <p><strong>Search Radius:</strong> {{ getValue(report.searchRadiusMeters) }}</p>
+          <p><strong>Collar:</strong> {{ getValue(report.hasCollar) }}</p>
+          <p><strong>Placa:</strong> {{ getValue(report.hasTag) }}</p>
+          <p><strong>Esterilizado:</strong> {{ getValue(report.isNeutered) }}</p>
+        </div>
+        <a
+            *ngIf="report.latitude && report.longitude"
+            [href]="'https://www.google.com/maps?q=' + report.latitude + ',' + report.longitude"
+            target="_blank"
+            class="btn btn-outline-primary btn-sm"
+            >
+            Ver en Google Maps
+          </a>
+      </div>
+    </div>
+  </div>
+  
+</div>

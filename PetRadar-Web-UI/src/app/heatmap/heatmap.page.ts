@@ -8,8 +8,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import * as L from 'leaflet';
-import 'leaflet.heat';
+// import 'leaflet.heat';
 import { ReportsHttpService } from './reports-http.service';
 import { ReportViewModel } from './report.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,14 +29,20 @@ export class HeatmapPageComponent implements AfterViewInit {
 
   private reportsService = inject(ReportsHttpService);
   private destroyRef = inject(DestroyRef);
-
+  private readonly router = inject(Router);
   private map!: L.Map;
   private heatLayer: any;
+  private markersLayer?: L.LayerGroup;
+  
 
   reports: ReportViewModel[] = [];
   filteredReports: ReportViewModel[] = [];
+  selectedReportId: number | null = null;
 
+  loadError = '';
+  isLoading = false;
   filters = {
+
     species: '',
     reportType: '',
     reportStatus: '',
@@ -45,9 +52,15 @@ export class HeatmapPageComponent implements AfterViewInit {
     intensity: 0.8,
   };
 
-  ngAfterViewInit(): void {
-    this.initMap();
-    this.loadReports();
+  async ngAfterViewInit(): Promise<void> {
+    try {
+        await this.ensureHeatPluginLoaded();
+        this.initMap();
+        this.loadReports();
+    } catch (error) {
+        console.error('No se pudo cargar leaflet.heat', error);
+        this.loadError = 'No fue posible inicializar el plugin del mapa de calor.';
+    }
   }
 
   private initMap(): void {
@@ -59,6 +72,21 @@ export class HeatmapPageComponent implements AfterViewInit {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
+  }
+
+  private async ensureHeatPluginLoaded(): Promise<void> {
+    const leafletAny = L as any;
+
+    if (typeof leafletAny.heatLayer === 'function') {
+        return;
+    }
+
+    (window as any).L = L;
+    await import('leaflet.heat');
+
+    if (typeof leafletAny.heatLayer !== 'function') {
+        throw new Error('leaflet.heat no se cargó correctamente');
+    }
   }
 
   private loadReports(): void {
@@ -120,30 +148,157 @@ export class HeatmapPageComponent implements AfterViewInit {
     this.renderHeatmap();
   }
 
-  private renderHeatmap(): void {
-    if (!this.map) return;
+    private renderHeatmap(): void {
+        if (!this.map) return;
 
-    if (this.heatLayer) {
-        this.map.removeLayer(this.heatLayer);
+        const leafletAny = L as any;
+
+        if (typeof leafletAny.heatLayer !== 'function') {
+            console.error('leaflet.heat no disponible en runtime');
+            this.loadError = 'El plugin de mapa de calor no está disponible en este entorno.';
+            return;
+        }
+
+        if (this.heatLayer) {
+            this.map.removeLayer(this.heatLayer);
+            this.heatLayer = undefined;
+        }
+
+        const heatPoints: [number, number, number][] = this.filteredReports.map((report) => [
+            Number(report.latitude),
+            Number(report.longitude),
+            this.filters.intensity,
+        ]);
+
+        if (!heatPoints.length) return;
+
+        this.heatLayer = leafletAny.heatLayer(heatPoints, {
+            radius: this.filters.radius,
+            blur: 18,
+            maxZoom: 17,
+            minOpacity: Math.max(0.15, this.filters.intensity / 3),
+        });
+
+        this.heatLayer.addTo(this.map);
+        this.renderMarkers();
     }
 
-    const heatPoints: [number, number, number][] = this.filteredReports.map((report) => [
-        report.latitude as number,
-        report.longitude as number,
-        this.filters.intensity,
-    ]);
+    formatDate(value?: string | null): string {
+        if (!value) return 'Sin fecha';
 
-    if (!heatPoints.length) {
-        return;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Sin fecha';
+
+        return date.toLocaleDateString('es-MX', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
+        }
+
+        getShortLocation(report: ReportViewModel): string {
+        if (report.addressText && report.addressText.trim()) {
+            return report.addressText;
+        }
+
+        if (report.latitude != null && report.longitude != null) {
+            return `${Number(report.latitude).toFixed(4)}, ${Number(report.longitude).toFixed(4)}`;
+            //return `Zona aproximada: (${Number(report.latitude).toFixed(4)}, ${Number(report.longitude).toFixed(4)})`;
+        }
+
+        return 'Sin ubicación';
+        }
+
+        openReportDetail(report: ReportViewModel): void {
+        this.router.navigate(['/app/reports', report.id]);
     }
 
-    this.heatLayer = (L as any).heatLayer(heatPoints, {
-        radius: this.filters.radius,
-        blur: 18,
-        maxZoom: 17,
-        minOpacity: Math.max(0.15, this.filters.intensity / 3),
-    });
+    getReportTypeLabel(value?: string | null): string {
+        switch (value) {
+            case 'Lost': return 'Perdido';
+            case 'Found': return 'Encontrado';
+            case 'Stray': return 'Callejero';
+            default: return value || 'N/D';
+        }
+    }
 
-    this.heatLayer.addTo(this.map);
-  }
+    getReportStatusLabel(value?: string | null): string {
+        switch (value) {
+            case 'Active': return 'Activo';
+            case 'Resolved': return 'Resuelto';
+            case 'Adopted': return 'Adoptado';
+            case 'Cancelled': return 'Cancelado';
+            default: return value || 'N/D';
+        }
+    }
+
+    onReportSelected(report: ReportViewModel): void {
+        this.selectedReportId = report.id;
+
+        if (report.latitude && report.longitude) {
+            this.map.setView([report.latitude, report.longitude], 14);
+        }
+    }
+
+    private renderMarkers(): void {
+        if (!this.map) return;
+
+        if (this.markersLayer) {
+            this.map.removeLayer(this.markersLayer);
+        }
+
+        this.markersLayer = L.layerGroup();
+
+        this.filteredReports.forEach((report) => {
+            if (report.latitude == null || report.longitude == null) return;
+
+            const marker = L.circleMarker(
+            [report.latitude, report.longitude],
+            {
+                radius: 6,
+                color: '#007bff',
+                fillColor: '#007bff',
+                fillOpacity: 0.3,
+            }
+            );
+
+            marker.on('click', () => {
+            this.onReportSelected(report);
+            });
+
+           const mapsUrl = this.getGoogleMapsUrl(report);
+           marker.bindTooltip(`
+                <div class="report-tooltip">
+                    <div><strong>Reporte #${report.id}</strong></div>
+                    <div>Tipo: ${this.getReportTypeLabel(report.reportType)}</div>
+                    <div>Especie: ${report.species || 'N/D'}</div>
+                    <div>Estado: ${this.getReportStatusLabel(report.reportStatus)}</div>
+                    <div>Fecha: ${this.formatDate(report.incidentDate)}</div>
+                    <div>Ubicación: ${this.getShortLocation(report)}</div>
+                </div>
+                `, {
+                direction: 'top',
+                offset: [0, -8],
+                opacity: 0.95,
+           });
+
+            this.markersLayer!.addLayer(marker);
+        });
+
+        this.markersLayer.addTo(this.map);
+    }
+
+    openSelectedReportDetail(): void {
+        if (!this.selectedReportId) return;
+
+        this.router.navigate(['/app/reports', this.selectedReportId]);
+    }
+
+    getGoogleMapsUrl(report: ReportViewModel): string | null {
+        if (report.latitude != null && report.longitude != null) {
+            return `https://www.google.com/maps?q=${report.latitude},${report.longitude}`;
+        }
+        return null;
+    }
+    
 }
