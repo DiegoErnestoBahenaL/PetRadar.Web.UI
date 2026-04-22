@@ -99,6 +99,8 @@ export class LoginComponent implements OnInit {
           this.errorGeneral =
             'No fue posible iniciar sesión. Inténtalo de nuevo más tarde.';
         }
+
+        this.router.navigate(['/login']);
       },
     });
   }

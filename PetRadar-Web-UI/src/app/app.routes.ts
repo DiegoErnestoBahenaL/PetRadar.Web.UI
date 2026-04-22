@@ -8,11 +8,13 @@ import { authGuard } from './auth/auth.guard';
 import { HeatmapPageComponent } from './heatmap/heatmap.page';
 import { ReportDetailPageComponent } from './reports/report-detail-page.component';
 import { MatchesPageComponent } from './matches/matches.page';
+import { LandingPage } from './landing-page/landing-page';
 
 export const routes: Routes = [
   // Public
-  { path: '', component: LoginComponent },
+  { path: '', component: LandingPage },
   { path: 'registro', component: RegisterComponent },
+  {path: 'login', component: LoginComponent},
 
   // Private 
   {
@@ -29,6 +31,6 @@ export const routes: Routes = [
     ],
   },
 
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'login' },
 ];
 
