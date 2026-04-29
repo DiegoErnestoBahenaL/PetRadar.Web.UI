@@ -1,0 +1,75 @@
+<section class="content-header">
+  <h1>Configuraciones del sistema</h1>
+</section>
+
+<section class="content">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Modelos de ML</h3>
+    </div>
+
+    <div class="card-body" *ngIf="!isLoading; else loading">
+      <div class="alert alert-success" *ngIf="message">{{ message }}</div>
+      <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+      <div class="form-group mb-3">
+        <label>Umbral de confianza YOLO</label>
+        <input
+          type="number"
+          class="form-control"
+          min="0"
+          max="1"
+          step="0.01"
+          [(ngModel)]="configs.yoloConfThreshold"
+        />
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Top K predicciones de raza</label>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          step="1"
+          [(ngModel)]="configs.topKBreedPredictions"
+        />
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Umbral de predicción de raza</label>
+        <input
+          type="number"
+          class="form-control"
+          min="0"
+          max="1"
+          step="0.01"
+          [(ngModel)]="configs.topKBreedPredictionThreshold"
+        />
+      </div>
+
+      <button class="btn btn-primary" (click)="save()" [disabled]="isSaving">
+        {{ isSaving ? 'Guardando...' : 'Guardar configuraciones' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      <h3 class="card-title">Descargas ZIP</h3>
+    </div>
+
+    <div class="card-body">
+      <button class="btn btn-outline-primary me-2" (click)="downloadImagesBackup()">
+        Descargar respaldo de imágenes
+      </button>
+
+      <button class="btn btn-outline-secondary" (click)="downloadDbBackup()">
+        Descargar respaldo de base de datos
+      </button>
+    </div>
+  </div>
+</section>
+
+<ng-template #loading>
+  <div class="p-3">Cargando configuraciones...</div>
+</ng-template>

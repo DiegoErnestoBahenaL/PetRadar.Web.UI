@@ -26,5 +26,25 @@ export class ReportsHttpService {
   updateReportStatus(id: number, reportStatus: ReportStatus): Observable<void> {
     const payload: ReportUpdatePayload = { reportStatus };
     return this.http.put<void>(`${this.baseUrl}/api/Reports/${id}`, payload);
+  } 
+
+  getReportMainPicture(reportId: number) {
+    return this.http.get(
+      `${this.baseUrl}/api/Reports/${reportId}/mainpicture`,
+      { responseType: 'blob' }
+    );
+  }
+
+  getReportAdditionalPhotos(reportId: number) {
+    return this.http.get<string[]>(
+      `${this.baseUrl}/api/Reports/${reportId}/additionalphotos`
+    );
+  }
+
+  getReportAdditionalPhoto(reportId: number, photoName: string) {
+    return this.http.get(
+      `${this.baseUrl}/api/Reports/${reportId}/additionalphotos/${photoName}`,
+      { responseType: 'blob' }
+    );
   }
 }

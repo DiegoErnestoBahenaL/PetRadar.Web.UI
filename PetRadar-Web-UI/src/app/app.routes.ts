@@ -8,6 +8,7 @@ import { authGuard } from './auth/auth.guard';
 import { HeatmapPageComponent } from './heatmap/heatmap.page';
 import { ReportDetailPageComponent } from './reports/report-detail-page.component';
 import { MatchesPageComponent } from './matches/matches.page';
+import { SystemConfigPageComponent } from './system-config/system-config.page';
 
 export const routes: Routes = [
   // Public
@@ -26,6 +27,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
       { path: 'matches', component: MatchesPageComponent },
       { path: 'reports/:id', component: ReportDetailPageComponent, canActivate: [authGuard] },
+      { path: 'system-config', component: SystemConfigPageComponent, canActivate: [authGuard], },
     ],
   },
 
