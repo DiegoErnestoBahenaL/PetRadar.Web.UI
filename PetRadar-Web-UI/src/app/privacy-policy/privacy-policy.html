@@ -1,0 +1,269 @@
+<nav>
+  <div class="nav-inner">
+    <a routerLink="/" class="logo">Pet<span>Radar</span></a>
+    <div class="nav-links">
+      <a routerLink="/">Inicio</a>
+      <a routerLink="/login">Ingresar</a>
+    </div>
+  </div>
+</nav>
+
+<main class="policy">
+  <div class="policy-inner">
+    <div class="policy-label">Documento legal</div>
+    <h1>Aviso de Privacidad</h1>
+    <p class="policy-meta">Última actualización: {{ lastUpdated }}</p>
+
+    <section>
+      <h2>1. Identidad del responsable</h2>
+      <p>
+        El responsable del tratamiento de los datos personales recabados a través de la
+        aplicación móvil y del sitio web <strong>PetRadar</strong> es Diego Ernesto
+        Bahena López (en adelante, "PetRadar", "nosotros" o "el responsable"), con
+        domicilio en Guadalajara, Jalisco, México. Para cualquier consulta relacionada
+        con este aviso puede contactarnos en
+        <a [attr.href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Alcance</h2>
+      <p>
+        Este aviso describe cómo PetRadar recopila, utiliza, almacena, comparte y
+        protege la información personal de las personas que utilizan nuestra aplicación
+        móvil para Android, nuestra aplicación web y los servicios relacionados (en
+        conjunto, los "Servicios"). Al utilizar los Servicios usted acepta las
+        prácticas descritas en este documento.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Información que recopilamos</h2>
+      <p>Recopilamos las siguientes categorías de información:</p>
+      <ul>
+        <li>
+          <strong>Datos de cuenta:</strong> nombre, correo electrónico, contraseña
+          cifrada y, opcionalmente, número de teléfono, proporcionados al registrarse.
+        </li>
+        <li>
+          <strong>Datos de mascota:</strong> nombre, especie, raza, edad, sexo, color,
+          señas particulares, fotografías y cualquier otra información que el usuario
+          decida agregar a la ficha de su mascota.
+        </li>
+        <li>
+          <strong>Reportes y avistamientos:</strong> descripciones, fotografías,
+          ubicación aproximada y fecha del evento reportado.
+        </li>
+        <li>
+          <strong>Imágenes y contenido de la cámara:</strong> fotografías que el
+          usuario decide tomar o seleccionar para asociarlas a una mascota o a un
+          reporte de avistamiento. Este contenido se obtiene mediante la API de cámara
+          del dispositivo y/o de la galería de fotos.
+        </li>
+        <li>
+          <strong>Datos de ubicación:</strong> ubicación geográfica aproximada
+          asociada a un reporte o avistamiento, cuando el usuario opta por
+          proporcionarla.
+        </li>
+        <li>
+          <strong>Datos técnicos y de uso:</strong> identificadores del dispositivo,
+          versión del sistema operativo, modelo, idioma, registros de errores y
+          eventos de uso necesarios para operar y mejorar el servicio.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Permiso de cámara (android.permission.CAMERA)</h2>
+      <p>
+        La aplicación móvil de PetRadar solicita el permiso de cámara
+        (<code>android.permission.CAMERA</code>) con la finalidad exclusiva de
+        permitir al usuario:
+      </p>
+      <ul>
+        <li>
+          Tomar fotografías de su mascota para crear o actualizar la ficha de
+          identificación dentro de la aplicación.
+        </li>
+        <li>
+          Tomar fotografías de animales avistados en la vía pública para incluirlas
+          en un reporte de avistamiento.
+        </li>
+      </ul>
+      <p>
+        El acceso a la cámara se activa únicamente cuando el usuario presiona de
+        forma explícita el botón correspondiente dentro de la aplicación. PetRadar
+        <strong>no</strong> accede a la cámara en segundo plano, no graba audio, no
+        graba vídeo y no recopila imágenes sin la acción directa del usuario.
+      </p>
+      <p>
+        Las fotografías capturadas se almacenan en los servidores de PetRadar
+        únicamente con el propósito de mostrarlas en la ficha de la mascota o en el
+        reporte asociado, y de facilitar el cruce de información para reunificar
+        mascotas perdidas con sus dueños. El usuario puede eliminar en cualquier
+        momento las fotografías que haya cargado, eliminando la ficha o el reporte
+        correspondiente desde la aplicación.
+      </p>
+      <p>
+        Puede revocar el permiso de cámara en cualquier momento desde la
+        configuración de su dispositivo Android (Ajustes &rarr; Aplicaciones &rarr;
+        PetRadar &rarr; Permisos). Revocar el permiso no eliminará el contenido
+        previamente cargado; para ello deberá utilizar las opciones de eliminación
+        dentro de la aplicación o solicitarlo conforme a la sección 9.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Finalidades del tratamiento</h2>
+      <p>Utilizamos su información personal para las siguientes finalidades:</p>
+      <ul>
+        <li>Crear y administrar su cuenta de usuario.</li>
+        <li>
+          Registrar mascotas y reportes de avistamientos, y mostrarlos a la
+          comunidad para favorecer la reunificación de mascotas perdidas.
+        </li>
+        <li>
+          Generar alertas y notificaciones cuando se detecten posibles coincidencias
+          entre mascotas reportadas como perdidas y avistamientos cercanos.
+        </li>
+        <li>Operar, mantener, depurar y mejorar los Servicios.</li>
+        <li>
+          Cumplir con obligaciones legales aplicables y prevenir usos indebidos del
+          servicio.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6. Base de legitimación</h2>
+      <p>
+        El tratamiento de los datos se realiza con fundamento en el consentimiento
+        que el usuario otorga al registrarse y utilizar los Servicios, así como en
+        el interés legítimo de PetRadar para prestar y mejorar la plataforma y
+        cumplir con sus obligaciones legales.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Compartición con terceros</h2>
+      <p>
+        PetRadar <strong>no vende</strong> su información personal. Compartimos
+        datos únicamente en los siguientes supuestos:
+      </p>
+      <ul>
+        <li>
+          <strong>Visibilidad pública dentro del servicio:</strong> la información
+          contenida en una ficha de mascota perdida o en un reporte de avistamiento
+          (incluyendo fotografía, descripción y ubicación aproximada) puede ser
+          visible para otros usuarios de la comunidad con el propósito explícito de
+          facilitar la reunificación.
+        </li>
+        <li>
+          <strong>Proveedores de infraestructura:</strong> empleamos proveedores de
+          alojamiento en la nube, almacenamiento y análisis para operar el servicio.
+          Estos proveedores procesan los datos exclusivamente bajo instrucciones de
+          PetRadar y conforme a acuerdos de confidencialidad.
+        </li>
+        <li>
+          <strong>Autoridades:</strong> cuando la legislación aplicable lo requiera
+          o ante un requerimiento válido de autoridad competente.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>8. Conservación de los datos</h2>
+      <p>
+        Conservamos sus datos mientras su cuenta permanezca activa y por los
+        periodos adicionales necesarios para cumplir con obligaciones legales,
+        resolver disputas o hacer cumplir nuestros acuerdos. Cuando los datos ya no
+        sean necesarios, serán eliminados o anonimizados.
+      </p>
+    </section>
+
+    <section>
+      <h2>9. Derechos del titular</h2>
+      <p>
+        Usted tiene derecho a acceder, rectificar, cancelar u oponerse al tratamiento
+        de sus datos personales (derechos ARCO), así como a revocar el consentimiento
+        otorgado y a limitar el uso o divulgación de su información. Para ejercer
+        estos derechos puede:
+      </p>
+      <ul>
+        <li>
+          Editar o eliminar fichas de mascota, reportes y fotografías directamente
+          desde la aplicación.
+        </li>
+        <li>
+          Solicitar la eliminación total de su cuenta y de los datos asociados
+          enviando una solicitud a
+          <a [attr.href]="'mailto:' + contactEmail">{{ contactEmail }}</a>
+          desde la dirección de correo registrada.
+        </li>
+      </ul>
+      <p>
+        Daremos respuesta a su solicitud dentro de un plazo razonable, sin exceder
+        los plazos previstos por la legislación aplicable.
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Seguridad</h2>
+      <p>
+        Implementamos medidas técnicas, administrativas y físicas razonables para
+        proteger sus datos personales contra el acceso no autorizado, la pérdida,
+        alteración o divulgación. Las contraseñas se almacenan cifradas y la
+        comunicación con nuestros servidores se realiza mediante conexiones HTTPS.
+        No obstante, ningún sistema es totalmente infalible, por lo que no podemos
+        garantizar una seguridad absoluta.
+      </p>
+    </section>
+
+    <section>
+      <h2>11. Menores de edad</h2>
+      <p>
+        Los Servicios no están dirigidos a menores de 13 años. Si tomamos
+        conocimiento de que hemos recopilado información personal de un menor sin
+        el consentimiento verificable de quien ejerce la patria potestad o tutela,
+        eliminaremos dicha información a la brevedad.
+      </p>
+    </section>
+
+    <section>
+      <h2>12. Transferencias internacionales</h2>
+      <p>
+        Sus datos pueden ser almacenados o procesados en servidores ubicados fuera
+        de su país de residencia. En todos los casos adoptamos las medidas
+        necesarias para que dichas transferencias se realicen con un nivel de
+        protección adecuado.
+      </p>
+    </section>
+
+    <section>
+      <h2>13. Cambios a este aviso</h2>
+      <p>
+        Podemos actualizar este Aviso de Privacidad para reflejar cambios en
+        nuestras prácticas o por motivos legales u operativos. Publicaremos la
+        versión vigente en esta misma URL e indicaremos la fecha de la última
+        actualización. Le recomendamos revisarlo periódicamente.
+      </p>
+    </section>
+
+    <section>
+      <h2>14. Contacto</h2>
+      <p>
+        Para cualquier duda, comentario o ejercicio de derechos relacionados con
+        este Aviso de Privacidad, puede comunicarse con nosotros a través del
+        correo
+        <a [attr.href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.
+      </p>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p>&copy; 2026 PetRadar — Diego Ernesto Bahena López. Guadalajara, Jalisco, México.</p>
+    <a routerLink="/">Volver al inicio</a>
+  </div>
+</footer>
