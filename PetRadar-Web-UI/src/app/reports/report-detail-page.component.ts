@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 import { ReportsHttpService } from '../heatmap/reports-http.service';
 import { ReportViewModel } from '../heatmap/report.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-report-detail-page',
@@ -22,6 +23,8 @@ export class ReportDetailPageComponent {
   report: ReportViewModel | null = null;
   isLoading = true;
   loadError = '';
+  reportMainPictureUrl: string | null = null;
+  additionalPhotoUrls: string[] = [];
 
   ngOnInit(): void {
     this.route.paramMap
@@ -40,6 +43,8 @@ export class ReportDetailPageComponent {
       .subscribe({
         next: (report) => {
           this.report = report;
+          this.loadReportPicture(report.id);
+          this.loadAdditionalPhotos(report.id);
           this.isLoading = false;
         },
         error: (error) => {
@@ -97,5 +102,54 @@ export class ReportDetailPageComponent {
       case 'Cancelled': return 'Cancelado';
       default: return value || 'N/D';
     }
+  }
+
+  loadReportPicture(reportId: number): void {
+    this.reportsService.getReportMainPicture(reportId).subscribe({
+      next: (blob) => {
+        this.reportMainPictureUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.reportMainPictureUrl = null;
+      },
+    });
+  }
+
+  loadAdditionalPhotos(reportId: number): void {
+    this.reportsService.getReportAdditionalPhotos(reportId).subscribe({
+      next: (photoNames) => {
+        if (!photoNames || photoNames.length === 0) {
+          this.additionalPhotoUrls = [];
+          return;
+        }
+
+        const requests = photoNames.map((photoName) =>
+          this.reportsService.getReportAdditionalPhoto(reportId, photoName)
+        );
+
+        forkJoin(requests).subscribe({
+          next: (blobs) => {
+            this.additionalPhotoUrls = blobs.map((blob) =>
+              URL.createObjectURL(blob)
+            );
+          },
+          error: () => {
+            this.additionalPhotoUrls = [];
+          },
+        });
+      },
+      error: (err) => {
+        console.error('Error cargando fotos adicionales:', err);
+        this.additionalPhotoUrls = [];
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.reportMainPictureUrl) {
+      URL.revokeObjectURL(this.reportMainPictureUrl);
+    }
+
+    this.additionalPhotoUrls.forEach((url) => URL.revokeObjectURL(url));
   }
 }

@@ -76,6 +76,14 @@
                 <input class="form-control" formControlName="phoneNumber" />
               </div>
 
+              <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <select class="form-select" formControlName="role">
+                  <option *ngFor="let option of roleOptions" [ngValue]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
               <div class="col-md-6">
                 <label class="form-label">Foto (URL)</label>
                 <input class="form-control" formControlName="profilePhotoURL" />

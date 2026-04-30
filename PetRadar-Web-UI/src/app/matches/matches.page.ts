@@ -26,6 +26,8 @@ export class MatchesPageComponent {
   loadError = '';
   statusActionError = '';
   updatingMatchId: number | null = null;
+  deletingMatchId: number | null = null;
+  matchActionError = '';
 
   searchTerm = '';
 
@@ -214,4 +216,33 @@ export class MatchesPageComponent {
         },
       });
   }
+
+  deleteMatch(match: any, event?: Event): void {
+  event?.stopPropagation();
+
+  if (!match.id) return;
+
+  const confirmed = window.confirm(
+    `¿Deseas eliminar el match #${match.id}? Esta acción no se puede deshacer.`
+  );
+
+  if (!confirmed) return;
+
+  this.deletingMatchId = match.id;
+  this.matchActionError = '';
+
+  this.matchesService.deleteMatch(match.id).subscribe({
+    next: () => {
+      this.deletingMatchId = null;
+
+      // Ajusta estos nombres según tus arrays reales
+      this.matches = this.matches.filter((m: any) => m.id !== match.id);
+      this.filteredMatches = this.filteredMatches.filter((m: any) => m.id !== match.id);
+    },
+    error: () => {
+      this.deletingMatchId = null;
+      this.matchActionError = `No fue posible eliminar el match #${match.id}.`;
+    },
+  });
+}
 }
