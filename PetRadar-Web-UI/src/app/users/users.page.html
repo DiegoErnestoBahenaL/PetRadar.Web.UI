@@ -109,8 +109,11 @@
                    'fa-sort-down': sortKey === 'isActive' && sortDir === 'desc'
                  }"></i>
             </th> -->
-
             <th style="width:140px;" class="text-end">Acciones</th>
+            <th role="button" (click)="toggleSort('role')">
+              Rol
+            </th>
+            
           </tr>
         </thead>
 
@@ -135,6 +138,11 @@
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="getRoleClass(u.role)">
+                {{ u.role ?? 'Sin rol' }}
+              </span>
             </td>
           </tr>
 

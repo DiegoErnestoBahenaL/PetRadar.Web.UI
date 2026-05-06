@@ -22,7 +22,32 @@
         <div class="card-header">
           <h5 class="mb-0">Reporte #{{ report.id }}</h5>
         </div>
+        <div class="report-photo-container mb-3" *ngIf="reportMainPictureUrl; else noMainImage">
+          <img
+            [src]="reportMainPictureUrl"
+            alt="Foto principal del reporte"
+            class="report-photo"
+          />
+        </div>
 
+        <ng-template #noMainImage>
+          <div class="alert alert-secondary">
+            No hay imagen principal disponible.
+          </div>
+        </ng-template>
+
+        <div class="additional-photos-section mb-4" *ngIf="additionalPhotoUrls.length > 0">
+          <h6>Fotos adicionales</h6>
+
+          <div class="additional-photos-grid">
+            <img
+              *ngFor="let photoUrl of additionalPhotoUrls"
+              [src]="photoUrl"
+              alt="Foto adicional del reporte"
+              class="additional-photo"
+            />
+          </div>
+        </div>
         <div class="card-body">
           <div class="row g-3">
             <div class="col-md-6">

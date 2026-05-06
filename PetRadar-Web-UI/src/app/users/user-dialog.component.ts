@@ -38,6 +38,12 @@ export class UserDialogComponent {
   saving = false;
   errorMsg: string | null = null;
 
+  roleOptions = [
+    { value: RoleEnum.User, label: 'User' },
+    { value: RoleEnum.Organization, label: 'Organization' },
+    { value: RoleEnum.SuperAdmin, label: 'SuperAdmin'},
+  ];
+
   // Create: email, password, name (required)
   // Update: opcionales (password opcional)
   form = this.fb.group({
@@ -50,6 +56,7 @@ export class UserDialogComponent {
     organizationName: [''],
     organizationAddress: [''],
     organizationPhone: [''],
+    role: [RoleEnum.User, [Validators.required]],
   });
 
   private initFromData() {
@@ -74,14 +81,22 @@ export class UserDialogComponent {
         organizationAddress: (u as any).organizationAddress ?? '',
         organizationPhone: (u as any).organizationPhone ?? '',
       });
-
+      
+      role:
+      u.role === RoleEnum.Organization
+        ? RoleEnum.Organization
+        : u.role === RoleEnum.SuperAdmin
+        ? RoleEnum.SuperAdmin
+        : RoleEnum.User,
       // this.form.controls.email.disable();
       this.form.controls.email.enable();
       return;
     }
 
     // create mode
-    this.form.reset();
+    this.form.reset({
+      role: RoleEnum.User,
+    });
     this.form.controls.email.enable();
 
     this.form.controls.password.addValidators([Validators.required, Validators.minLength(6)]);
@@ -114,7 +129,7 @@ export class UserDialogComponent {
         organizationName: this.form.value.organizationName || null,
         organizationAddress: this.form.value.organizationAddress || null,
         organizationPhone: this.form.value.organizationPhone || null,
-        role: RoleEnum.User,
+        role: this.form.value.role ?? RoleEnum.User,
       };
 
       this.usersApi.apiUsersPost(payload).subscribe({
@@ -141,6 +156,7 @@ export class UserDialogComponent {
       organizationName: this.form.value.organizationName || null,
       organizationAddress: this.form.value.organizationAddress || null,
       organizationPhone: this.form.value.organizationPhone || null,
+      role: this.form.value.role ?? RoleEnum.User,
     };
 
     this.usersApi.apiUsersIdPut(id, payload).subscribe({

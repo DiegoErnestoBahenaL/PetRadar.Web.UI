@@ -7,7 +7,7 @@ import { UserViewModel } from '../api/petradar/model/userViewModel';
 
 import { UserDialogComponent, UserDialogData } from './user-dialog.component';
 
-type SortKey = 'id' | 'email' | 'name' | 'lastName' | 'phoneNumber' | 'isActive';
+type SortKey = 'id' | 'email' | 'name' | 'lastName' | 'phoneNumber' | 'isActive' | 'role';
 type SortDir = 'asc' | 'desc';
 
 @Component({
@@ -74,7 +74,7 @@ export class UsersPageComponent {
         (u as any).name ?? (u as any).firstName ?? '',
         u.lastName ?? '',
         u.phoneNumber ?? '',
-       
+        u.role ?? '',
       ]
         .map((x) => (x ?? '').toString().toLowerCase())
         .join(' ');
@@ -191,6 +191,23 @@ export class UsersPageComponent {
       },
       error: (err) => this.showToast(err?.message ?? 'Error eliminando', 'danger'),
     });
+  }
+
+  getRoleClass(role: string | null | undefined): string {
+    switch (role) {
+      case 'SuperAdmin':
+        return 'bg-danger';
+      case 'Admin':
+        return 'bg-warning text-dark';
+      case 'Organization':
+        return 'bg-success';
+      case 'User':
+        return 'bg-primary';
+      case 'NotSet':
+        return 'bg-secondary';
+      default:
+        return 'bg-secondary';
+    }
   }
 
   // ---------- toast helper ----------

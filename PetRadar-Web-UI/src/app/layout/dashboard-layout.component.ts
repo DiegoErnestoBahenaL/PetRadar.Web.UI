@@ -73,6 +73,12 @@ import { AuthService } from '../auth/auth.service';
                 <p>Matches</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a routerLink="/app/system-config" class="nav-link">
+                <i class="nav-icon fa-solid fa-sliders"></i>
+                <p>Configuración</p>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>

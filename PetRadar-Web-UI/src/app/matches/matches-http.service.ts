@@ -39,4 +39,10 @@ updateMatchStatus(
     status,
   });
  }
+
+ deleteMatch(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.baseUrl}/api/Matches/${id}`);
+}
+
+
 }

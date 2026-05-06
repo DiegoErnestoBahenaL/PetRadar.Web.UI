@@ -147,6 +147,14 @@
                       >
                         Ver encontrado
                       </button>
+
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="deleteMatch(match, $event)"
+                        [disabled]="deletingMatchId === match.id"
+                      >
+                        {{ deletingMatchId === match.id ? 'Eliminando...' : 'Eliminar' }}
+                      </button>
                     </div>
                   </td>
                 </tr>
