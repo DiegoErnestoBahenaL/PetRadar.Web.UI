@@ -130,11 +130,19 @@
 
             <td class="text-end text-nowrap">
               <div class="btn-group btn-group-sm" role="group">
-                <button class="btn btn-outline-warning" (click)="openEdit(u)" title="Editar">
+                <button 
+                  class="btn btn-outline-warning" 
+                  *ngIf="canEditUser(u.role)"
+                  (click)="openEdit(u)" 
+                  title="Editar">
                   <i class="fas fa-pen"></i>
                 </button>
 
-                <button class="btn btn-outline-danger" (click)="delete(u)" title="Eliminar">
+                <button 
+                  class="btn btn-outline-danger" 
+                  *ngIf="canDeleteUser(u.role)"
+                  (click)="delete(u)" 
+                  title="Eliminar">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>

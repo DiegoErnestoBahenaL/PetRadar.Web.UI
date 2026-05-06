@@ -1,19 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import {
+  PermissionService,
+  PermissionKey,
+  RoleEnum
+} from '../services/permission.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [RouterModule],
+  imports: [CommonModule, RouterModule],
   template: `
   <div class="app-wrapper">
-    <!-- Header -->
     <nav class="app-header navbar navbar-expand bg-body">
       <div class="container-fluid">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <!-- AdminLTE 4 sidebar toggle -->
             <button
               type="button"
               class="nav-link btn btn-link px-2"
@@ -23,7 +27,7 @@ import { AuthService } from '../auth/auth.service';
           </li>
 
           <li class="nav-item d-none d-md-block">
-            <a class="nav-link fw-semibold" routerLink="/app/users">PetRadar</a>
+            <a class="nav-link fw-semibold" routerLink="/app/pets">PetRadar</a>
           </li>
         </ul>
 
@@ -37,10 +41,9 @@ import { AuthService } from '../auth/auth.service';
       </div>
     </nav>
 
-    <!-- Sidebar -->
     <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
       <div class="sidebar-brand">
-        <a class="brand-link" routerLink="/app/users">
+        <a class="brand-link" routerLink="/app/pets">
           <span class="brand-text fw-light">PetRadar</span>
         </a>
       </div>
@@ -48,7 +51,8 @@ import { AuthService } from '../auth/auth.service';
       <div class="sidebar-wrapper">
         <nav class="mt-2">
           <ul class="nav sidebar-menu flex-column" role="menu" data-lte-toggle="treeview" data-accordion="false">
-            <li class="nav-item">
+
+            <li class="nav-item" *ngIf="can('canViewUsers')">
               <a class="nav-link" routerLink="/app/users" routerLinkActive="active">
                 <i class="nav-icon fas fa-users"></i>
                 <p>Usuarios</p>
@@ -61,22 +65,40 @@ import { AuthService } from '../auth/auth.service';
                 <p>Mascotas</p>
               </a>
             </li>
-            <li class="nav-item">
+
+            <li class="nav-item" *ngIf="can('canViewHeatmap')">
               <a routerLink="/app/heatmap" routerLinkActive="active" class="nav-link">
                 <i class="nav-icon fas fa-fire"></i>
                 <p>Mapa de calor</p>
               </a>
             </li>
-            <li class="nav-item">
+
+            <li class="nav-item" *ngIf="can('canViewMatches')">
               <a routerLink="/app/matches" routerLinkActive="active" class="nav-link">
                 <i class="nav-icon fas fa-link"></i>
                 <p>Matches</p>
               </a>
             </li>
-            <li class="nav-item">
-              <a routerLink="/app/system-config" class="nav-link">
+
+            <li class="nav-item" *ngIf="can('canConfigureSystem')">
+              <a routerLink="/app/system-config" routerLinkActive="active" class="nav-link">
                 <i class="nav-icon fa-solid fa-sliders"></i>
                 <p>Configuración</p>
+              </a>
+            </li>
+
+            <li class="nav-item" *ngIf="can('canViewHeatmap')">
+              <a routerLink="/app/analytics"
+                routerLinkActive="active"
+                class="nav-link">
+                <i class="nav-icon fas fa-chart-pie"></i>
+                <p>Analítica</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/app/profile" routerLinkActive="active">
+                <i class="nav-icon fas fa-user"></i>
+                <p>Mi perfil</p>
               </a>
             </li>
           </ul>
@@ -84,54 +106,74 @@ import { AuthService } from '../auth/auth.service';
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="app-main">
-      <!--<div class="app-content-header">
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-sm-6">
-              <h1 class="m-0">Panel</h1>
-            </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb float-sm-end mb-0">
-                <li class="breadcrumb-item"><a routerLink="/app/users">Inicio</a></li>
-                <li class="breadcrumb-item active">Panel</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      </div>-->
-
       <div class="app-content">
         <div class="container-fluid">
           <router-outlet></router-outlet>
         </div>
       </div>
     </main>
-
-    <!-- <footer class="app-footer">
-      <strong>PetRadar</strong>
-    </footer>-->
   </div>
 `,
 })
 export class DashboardLayoutComponent implements OnInit, OnDestroy {
-  constructor(private auth: AuthService, private router: Router) {}
+  currentUserRole: RoleEnum | null = null;
+
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    public permissionService: PermissionService
+  ) {}
 
   ngOnInit(): void {
-    // AdminLTE 4: layout-fixed + sidebar-expand-lg son claves
     document.body.classList.add('layout-fixed', 'sidebar-expand-lg', 'bg-body-tertiary');
+    this.loadCurrentUserRole();
   }
 
   ngOnDestroy(): void {
     document.body.classList.remove('layout-fixed', 'sidebar-expand-lg', 'bg-body-tertiary');
   }
 
+  can(permission: PermissionKey): boolean {
+    return this.permissionService.can(this.currentUserRole, permission);
+  }
+
+  private loadCurrentUserRole(): void {
+    this.currentUserRole = this.getRoleFromToken();
+
+    console.log('CURRENT ROLE:', this.currentUserRole);
+  }
+
   logout(): void {
     this.auth.logout();
     this.router.navigateByUrl('/');
   }
-  toggleSidebar() {
+
+  toggleSidebar(): void {
     document.body.classList.toggle('sidebar-collapse');
   }
+
+  private getRoleFromToken(): RoleEnum | null {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const role =
+        payload.role ??
+        payload.Role ??
+        payload.roles?.[0] ??
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      return role as RoleEnum;
+    } catch {
+      return null;
+    }
+  }
+
+
 }
