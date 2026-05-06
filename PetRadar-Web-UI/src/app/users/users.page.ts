@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 import { UsersService } from '../api/petradar/api/users.service';
 import { UserViewModel } from '../api/petradar/model/userViewModel';
-
+import {
+  PermissionService,
+  RoleEnum
+} from '../services/permission.service';
 import { UserDialogComponent, UserDialogData } from './user-dialog.component';
 
 type SortKey = 'id' | 'email' | 'name' | 'lastName' | 'phoneNumber' | 'isActive' | 'role';
@@ -20,6 +23,11 @@ export class UsersPageComponent {
   private usersApi = inject(UsersService);
 
   loading = false;
+
+
+  RoleEnum = RoleEnum;
+  currentUserRole: RoleEnum | null = null;
+  availableRoles: RoleEnum[] = [];
 
   // data
   users: UserViewModel[] = [];
@@ -43,7 +51,41 @@ export class UsersPageComponent {
   private toastTimer: any = null;
 
   ngOnInit(): void {
+    this.loadCurrentUserRole();
+    this.availableRoles = this.permissionService.getCreatableRoles(this.currentUserRole);
+
     this.load();
+  }
+
+  private loadCurrentUserRole(): void {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      this.currentUserRole = null;
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const role =
+        payload.role ??
+        payload.Role ??
+        payload.roles?.[0] ??
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      this.currentUserRole = role as RoleEnum;
+    } catch {
+      this.currentUserRole = null;
+    }
+  }
+
+  canEditUser(targetRole: RoleEnum | string | null | undefined): boolean {
+    return this.permissionService.canEditUser(this.currentUserRole, targetRole);
+  }
+
+  canDeleteUser(targetRole: RoleEnum | string | null | undefined): boolean {
+    return this.permissionService.canDeleteUser(this.currentUserRole, targetRole);
   }
 
   load(): void {
@@ -61,6 +103,11 @@ export class UsersPageComponent {
       },
     });
   }
+
+  constructor(
+    public permissionService: PermissionService
+  ) {}
+
 
   // ---------- derived data ----------
   get filteredUsers(): UserViewModel[] {
