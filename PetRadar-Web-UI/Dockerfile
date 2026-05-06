@@ -24,6 +24,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Típicamente: dist/<nombre-proyecto>/browser
 COPY --from=build /app/dist/PetRadar-Web-UI/browser /usr/share/nginx/html
 
+# Ensure robots.txt exists at site root (independent of Angular asset config)
+COPY public/robots.txt /usr/share/nginx/html/robots.txt
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

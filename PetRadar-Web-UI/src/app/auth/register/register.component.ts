@@ -122,7 +122,7 @@ export class RegisterComponent implements OnInit {
         this.mensajeInfo =
           'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.';
         // redirigir al login
-         this.router.navigate(['/']);
+         this.router.navigate(['/login']);
       },
       error: (err) => {
       this.cargando = false;
@@ -143,6 +143,6 @@ export class RegisterComponent implements OnInit {
   }
 
   irALogin(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 }

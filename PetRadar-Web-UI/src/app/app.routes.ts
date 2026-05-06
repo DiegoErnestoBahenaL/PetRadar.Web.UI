@@ -13,11 +13,15 @@ import { AnalyticsPageComponent } from './analytics/analytics-page/analytics-pag
 import { roleGuard } from './guards/role.guard';
 import { ProfilePageComponent } from './profile/profile-page.component';
 import { RoleEnum } from './services/permission.service';
+import { LandingPage } from './landing-page/landing-page';
+import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy';
 
 export const routes: Routes = [
   // Public
-  { path: '', component: LoginComponent },
+  { path: '', component: LandingPage },
   { path: 'registro', component: RegisterComponent },
+  {path: 'login', component: LoginComponent},
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
 
   // Private 
   {
@@ -96,5 +100,6 @@ export const routes: Routes = [
     },
   ],
 }
+  { path: '**', redirectTo: 'login' },
 ];
 
