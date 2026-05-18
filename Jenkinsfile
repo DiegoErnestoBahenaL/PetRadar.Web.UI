@@ -50,11 +50,16 @@ pipeline {
         stage('Build imágenes QA') {
             when { expression { env.BRANCH_NAME == 'QA' } }
             steps {
-                withCredentials([string(credentialsId: 'firebaseCredentialsJson', variable: 'FIREBASE_CREDENTIALS_JSON_BASE64')]) {
+                withCredentials([
+                    string(credentialsId: 'firebaseCredentialsJson', variable: 'FIREBASE_CREDENTIALS_JSON_BASE64'),
+                    string(credentialsId: 'ENCRYPTION_KEY', variable: 'ENCRYPTION_KEY'),
+                    string(credentialsId: 'ENCRYPTION_IV', variable: 'ENCRYPTION_IV')
+                ]) {
                     sh '''
                         set -e
                         cd ${PROJECT_ROOT}
                         DOCKER_BUILDKIT=${DOCKER_BUILDKIT} FIREBASE_CREDENTIALS_JSON_BASE64="${FIREBASE_CREDENTIALS_JSON_BASE64}" \
+                            ENCRYPTION_KEY="${ENCRYPTION_KEY}" ENCRYPTION_IV="${ENCRYPTION_IV}" \
                             docker compose -f ${COMPOSE_FILE} build
                     '''
                 }
@@ -64,11 +69,16 @@ pipeline {
         stage('Deploy stack QA') {
             when { expression { env.BRANCH_NAME == 'QA' } }
             steps {
-                withCredentials([string(credentialsId: 'firebaseCredentialsJson', variable: 'FIREBASE_CREDENTIALS_JSON_BASE64')]) {
+                withCredentials([
+                    string(credentialsId: 'firebaseCredentialsJson', variable: 'FIREBASE_CREDENTIALS_JSON_BASE64'),
+                    string(credentialsId: 'ENCRYPTION_KEY', variable: 'ENCRYPTION_KEY'),
+                    string(credentialsId: 'ENCRYPTION_IV', variable: 'ENCRYPTION_IV')
+                ]) {
                     sh '''
                         set -e
                         cd ${PROJECT_ROOT}
                         DOCKER_BUILDKIT=${DOCKER_BUILDKIT} FIREBASE_CREDENTIALS_JSON_BASE64="${FIREBASE_CREDENTIALS_JSON_BASE64}" \
+                            ENCRYPTION_KEY="${ENCRYPTION_KEY}" ENCRYPTION_IV="${ENCRYPTION_IV}" \
                             docker compose -f ${COMPOSE_FILE} up -d
                     '''
                 }
