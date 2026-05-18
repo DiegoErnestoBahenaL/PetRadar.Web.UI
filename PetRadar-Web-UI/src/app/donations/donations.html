@@ -1,0 +1,108 @@
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">Pet<span>Radar</span></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Apoya el proyecto</div>
+    <h1>Ayuda a mantener <em>PetRadar activo</em></h1>
+    <p>Tu donación nos permite seguir desarrollando herramientas para reunir mascotas perdidas con sus familias.</p>
+  </div>
+</section>
+
+<!-- DONATION OPTIONS -->
+<section class="donations-section">
+  <div class="section-inner">
+    <div class="section-label">Donación</div>
+    <h2 class="section-title">Elige el monto de tu apoyo</h2>
+    <p class="section-subtitle">Todas las donaciones son procesadas de forma segura a través de Stripe.</p>
+
+    <div class="cards-grid">
+      <!-- $20 -->
+      <div class="donation-card">
+        <div class="amount-badge">$20 MXN</div>
+        <h3>Apoyo Básico</h3>
+        <p>Contribuye con un café y ayuda a mantener los servidores corriendo para que más mascotas puedan ser encontradas.</p>
+        <ul class="perks">
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Pago único
+          </li>
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Procesado de forma segura
+          </li>
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Ayuda directa al proyecto
+          </li>
+        </ul>
+        <button class="btn-donate btn-secondary" (click)="donate(20)">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Donar $20 MXN
+        </button>
+      </div>
+
+      <!-- $50 -->
+      <div class="donation-card donation-card--featured">
+        <div class="featured-badge">Más popular</div>
+        <div class="amount-badge">$50 MXN</div>
+        <h3>Apoyo Completo</h3>
+        <p>Haz un impacto mayor y permite que más familias sean reunidas con sus mascotas perdidas en toda la comunidad.</p>
+        <ul class="perks">
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Pago único
+          </li>
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Procesado de forma segura
+          </li>
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Mayor impacto en la comunidad
+          </li>
+          <li>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Ayuda directa al desarrollo
+          </li>
+        </ul>
+        <button class="btn-donate btn-primary" (click)="donate(50)">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Donar $50 MXN
+        </button>
+      </div>
+    </div>
+
+    <p class="stripe-note">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Pagos seguros procesados por Stripe. No almacenamos información de tu tarjeta.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/" class="logo">Pet<span>Radar</span></a>
+      <p>Plataforma para la reunificación de mascotas perdidas y monitoreo de avistamientos de animales callejeros.</p>
+    </div>
+    <div class="footer-contact">
+      <h4>Contacto</h4>
+      <a href="mailto:business@petradar-qa.org">business&#64;petradar-qa.org</a>
+      <a href="https://petradar-qa.org">petradar-qa.org</a>
+    </div>
+    <div class="footer-contact">
+      <h4>Legal</h4>
+      <a href="privacy-policy">Aviso de Privacidad</a>
+    </div>
+  </div>
+  <div class="footer-legal">
+    <p>&copy; 2026 PetRadar — DIEGO ERNESTO BAHENA LOPEZ. Todos los derechos reservados. Guadalajara, Jalisco, México.</p>
+  </div>
+</footer>
