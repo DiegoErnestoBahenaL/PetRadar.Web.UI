@@ -5,15 +5,309 @@ import { FormsModule } from '@angular/forms';
 import { ReportsHttpService } from '../../heatmap/reports-http.service';
 import { ReportViewModel } from '../../heatmap/report.model';
 
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import * as XLSX from 'xlsx-js-style';
+
 @Component({
   selector: 'app-analytics-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './analytics-page.component.html',
-  styleUrl: './analytics-page.component.css'
+  styleUrl: './analytics-page.component.scss'  
 })
 export class AnalyticsPageComponent implements OnInit {
   private readonly reportsService = inject(ReportsHttpService);
+
+  viewMode: 'summary' | 'charts' = 'summary';
+
+  setViewMode(mode: 'summary' | 'charts'): void {
+    this.viewMode = mode;
+
+    if (mode === 'charts') {
+      setTimeout(() => this.renderCharts(), 0);
+    }
+  }
+
+  private charts: Chart[] = [];
+
+  private renderCharts(): void {
+    this.charts.forEach(chart => chart.destroy());
+    this.charts = [];
+
+    this.createChart('statusChart', {
+      type: 'doughnut',
+      data: {
+        labels: this.statusDistribution.map(x => this.getStatusLabel(x.label)),
+        datasets: [{ data: this.statusDistribution.map(x => x.value) }]
+      }
+    });
+
+    this.createChart('speciesChart', {
+      type: 'doughnut',
+      data: {
+        labels: this.speciesDistribution.map(x => this.getSpeciesLabel(x.label)),
+        datasets: [{ data: this.speciesDistribution.map(x => x.value) }]
+      }
+    });
+
+    this.createChart('monthlyTrendChart', {
+      type: 'line',
+      data: {
+        labels: this.monthlyTrend.map(x => x.label),
+        datasets: [{
+          label: 'Reportes',
+          data: this.monthlyTrend.map(x => x.value),
+          tension: 0.35
+        }]
+      }
+    });
+
+    this.createChart('zoneChart', {
+      type: 'bar',
+      data: {
+        labels: this.zoneDistribution.map(x => x.label),
+        datasets: [{
+          label: 'Reportes',
+          data: this.zoneDistribution.map(x => x.value)
+        }]
+      },
+      options: {
+        indexAxis: 'y'
+      }
+    });
+    this.createChart('dataQualityRadarChart', {
+      type: 'radar',
+      data: {
+        labels: [
+          'Foto',
+          'Coordenadas',
+          'Raza',
+          'Color',
+          'Collar',
+          'Placa'
+        ],
+        datasets: [{
+          label: 'Calidad de datos (%)',
+          data: this.getDataQualityRadarValues()
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+
+    this.createChart('rewardViewsScatterChart', {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Reportes',
+          data: this.getRewardViewsScatterData()
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Recompensa'
+            },
+            beginAtZero: true
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Visualizaciones'
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    this.createChart('radiusViewsBubbleChart', {
+      type: 'bubble',
+      data: {
+        datasets: [{
+          label: 'Reportes',
+          data: this.getRadiusViewsBubbleData()
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Radio de búsqueda (m)'
+            },
+            beginAtZero: true
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Visualizaciones'
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+
+  private getDataQualityRadarValues(): number[] {
+    const total = this.filteredReports.length;
+
+    if (total === 0) {
+      return [0, 0, 0, 0, 0, 0];
+    }
+
+    const withPhoto = this.filteredReports.filter(
+      report => !!report.photoURL || !!report.additionalPhotosURL
+    ).length;
+
+    const withGeo = this.filteredReports.filter(
+      report => report.latitude != null && report.longitude != null
+    ).length;
+
+    const withBreed = this.filteredReports.filter(
+      report => !!report.breed
+    ).length;
+
+    const withColor = this.filteredReports.filter(
+      report => !!report.color
+    ).length;
+
+    const withCollar = this.filteredReports.filter(
+      report => report.hasCollar
+    ).length;
+
+    const withTag = this.filteredReports.filter(
+      report => report.hasTag
+    ).length;
+
+    return [
+      Math.round((withPhoto / total) * 100),
+      Math.round((withGeo / total) * 100),
+      Math.round((withBreed / total) * 100),
+      Math.round((withColor / total) * 100),
+      Math.round((withCollar / total) * 100),
+      Math.round((withTag / total) * 100)
+    ];
+  }
+
+  private getRewardViewsScatterData(): { x: number; y: number }[] {
+    return this.filteredReports
+      .filter(report => report.rewardAmount != null && report.views != null)
+      .map(report => ({
+        x: Number(report.rewardAmount ?? 0),
+        y: Number(report.views ?? 0)
+      }));
+  }
+
+  private getRadiusViewsBubbleData(): { x: number; y: number; r: number }[] {
+    return this.filteredReports
+      .filter(report => report.searchRadiusMeters != null && report.views != null)
+      .map(report => {
+        const reward = Number(report.rewardAmount ?? 0);
+
+        return {
+          x: Number(report.searchRadiusMeters ?? 0),
+          y: Number(report.views ?? 0),
+          r: reward > 0 ? Math.min(Math.max(reward / 100, 4), 18) : 4
+        };
+      });
+  }
+  private createChart(
+    canvasId: string,
+    config: ChartConfiguration
+  ): void {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
+
+    if (!canvas) return;
+
+    const chart = new Chart(canvas, {
+      ...config,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        ...config.options
+      }
+    });
+
+    this.charts.push(chart);
+  }
+
+  statusChartData: ChartConfiguration<'doughnut'>['data'] = {
+    labels: [],
+    datasets: [{ data: [] }]
+  };
+
+  speciesChartData: ChartConfiguration<'doughnut'>['data'] = {
+    labels: [],
+    datasets: [{ data: [] }]
+  };
+
+  monthlyTrendChartData: ChartConfiguration<'line'>['data'] = {
+    labels: [],
+    datasets: [{ data: [], label: 'Reportes' }]
+  };
+
+  zoneChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [{ data: [], label: 'Reportes' }]
+  };
+
+  doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  };
+
+  lineChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
+
+  horizontalBarChartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
 
   reports: ReportViewModel[] = [];
   filteredReports: ReportViewModel[] = [];
@@ -46,7 +340,32 @@ export class AnalyticsPageComponent implements OnInit {
   selectedStartDate = '';
   selectedEndDate = '';
 
+
+  breedDistribution: { label: string; value: number; percentage: number }[] = [];
+  sizeDistribution: { label: string; value: number; percentage: number }[] = [];
+  sexDistribution: { label: string; value: number; percentage: number }[] = [];
+  colorDistribution: { label: string; value: number; percentage: number }[] = [];
+
+  geolocatedReports = 0;
+  geolocationCoverageRate = 0;
+
+  reportsWithPhoto = 0;
+  photoCoverageRate = 0;
+
+  reportsWithReward = 0;
+  rewardRate = 0;
+
+  reportsWithCollar = 0;
+  reportsWithTag = 0;
+
+  totalViews = 0;
+  averageViews = 0;
+
+  averageSearchRadiusMeters = 0;
+  dataQualityScore = 0;
+
   ngOnInit(): void {
+    Chart.register(...registerables);
     this.loadReports();
   }
 
@@ -129,8 +448,138 @@ export class AnalyticsPageComponent implements OnInit {
     this.speciesDistribution = this.buildDistribution(this.filteredReports, 'species');
     this.monthlyTrend = this.buildMonthlyTrend(this.filteredReports);
     this.zoneDistribution = this.buildZoneDistribution(this.filteredReports);
+
+
+    this.breedDistribution = this.buildDistribution(this.filteredReports, 'breed').slice(0, 5);
+    this.sizeDistribution = this.buildDistribution(this.filteredReports, 'size');
+    this.sexDistribution = this.buildDistribution(this.filteredReports, 'sex');
+    this.colorDistribution = this.buildColorDistribution(this.filteredReports).slice(0, 5);
+
+    this.updateCharts();
+    this.calculateAdvancedMetrics();
   }
 
+  private updateCharts(): void {
+    this.statusChartData = {
+      labels: this.statusDistribution.map(item => this.getStatusLabel(item.label)),
+      datasets: [
+        {
+          data: this.statusDistribution.map(item => item.value)
+        }
+      ]
+    };
+
+    this.speciesChartData = {
+      labels: this.speciesDistribution.map(item => this.getSpeciesLabel(item.label)),
+      datasets: [
+        {
+          data: this.speciesDistribution.map(item => item.value)
+        }
+      ]
+    };
+
+    this.monthlyTrendChartData = {
+      labels: this.monthlyTrend.map(item => item.label),
+      datasets: [
+        {
+          data: this.monthlyTrend.map(item => item.value),
+          label: 'Reportes',
+          tension: 0.35,
+          fill: false
+        }
+      ]
+    };
+
+    this.zoneChartData = {
+      labels: this.zoneDistribution.map(item => item.label),
+      datasets: [
+        {
+          data: this.zoneDistribution.map(item => item.value),
+          label: 'Reportes'
+        }
+      ]
+    };
+  }
+
+  private calculateAdvancedMetrics(): void {
+    const base = this.filteredReports;
+    const total = base.length;
+
+    if (total === 0) {
+      this.geolocatedReports = 0;
+      this.geolocationCoverageRate = 0;
+      this.reportsWithPhoto = 0;
+      this.photoCoverageRate = 0;
+      this.reportsWithReward = 0;
+      this.rewardRate = 0;
+      this.reportsWithCollar = 0;
+      this.reportsWithTag = 0;
+      this.totalViews = 0;
+      this.averageViews = 0;
+      this.averageSearchRadiusMeters = 0;
+      this.dataQualityScore = 0;
+      return;
+    }
+
+    this.geolocatedReports = base.filter(r => r.latitude != null && r.longitude != null).length;
+    this.geolocationCoverageRate = Math.round((this.geolocatedReports / total) * 100);
+
+    this.reportsWithPhoto = base.filter(r => !!r.photoURL || !!r.additionalPhotosURL).length;
+    this.photoCoverageRate = Math.round((this.reportsWithPhoto / total) * 100);
+
+    //this.reportsWithReward = base.filter(r => r.offersReward).length;
+    this.rewardRate = Math.round((this.reportsWithReward / total) * 100);
+
+    this.reportsWithCollar = base.filter(r => r.hasCollar).length;
+    this.reportsWithTag = base.filter(r => r.hasTag).length;
+
+    //this.totalViews = base.reduce((sum, report) => sum + (report.views ?? 0), 0);
+    this.averageViews = Math.round(this.totalViews / total);
+
+    const reportsWithRadius = base.filter(r => r.searchRadiusMeters != null);
+    this.averageSearchRadiusMeters = reportsWithRadius.length > 0
+      ? Math.round(
+          reportsWithRadius.reduce((sum, r) => sum + (r.searchRadiusMeters ?? 0), 0) / reportsWithRadius.length
+        )
+      : 0;
+
+    const breedCompleteness = base.filter(r => !!r.breed).length / total;
+    const colorCompleteness = base.filter(r => !!r.color).length / total;
+    const geoCompleteness = this.geolocatedReports / total;
+    const photoCompleteness = this.reportsWithPhoto / total;
+
+    this.dataQualityScore = Math.round(
+      ((breedCompleteness + colorCompleteness + geoCompleteness + photoCompleteness) / 4) * 100
+    );
+  }
+
+private buildColorDistribution(
+  reports: ReportViewModel[]
+): { label: string; value: number; percentage: number }[] {
+  const colors = reports
+    .flatMap(report => (report.color ?? '').split(','))
+    .map(color => color.trim())
+    .filter(Boolean);
+
+  const total = colors.length;
+
+  if (total === 0) {
+    return [];
+  }
+
+  const counts = colors.reduce<Record<string, number>>((acc, color) => {
+    acc[color] = (acc[color] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts)
+    .map(([label, value]) => ({
+      label,
+      value,
+      percentage: Math.round((value / total) * 100)
+    }))
+    .sort((a, b) => b.value - a.value);
+}
   private buildMonthlyTrend(
     reports: ReportViewModel[]
   ): { label: string; value: number; percentage: number }[] {
@@ -141,29 +590,67 @@ export class AnalyticsPageComponent implements OnInit {
       return [];
     }
 
-    const counts = validReports.reduce<Record<string, number>>((acc, report) => {
+    const counts = validReports.reduce<Record<string, { value: number; date: Date }>>((acc, report) => {
       const date = new Date(report.incidentDate!);
 
       if (Number.isNaN(date.getTime())) {
         return acc;
       }
 
-      const label = date.toLocaleDateString('es-MX', {
-        month: 'short',
-        year: 'numeric'
-      });
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-      acc[label] = (acc[label] ?? 0) + 1;
+      if (!acc[key]) {
+        acc[key] = {
+          value: 0,
+          date: new Date(date.getFullYear(), date.getMonth(), 1)
+        };
+      }
+
+      acc[key].value++;
       return acc;
     }, {});
 
-    return Object.entries(counts)
-      .map(([label, value]) => ({
-        label,
-        value,
-        percentage: Math.round((value / total) * 100)
-      }))
-      .sort((a, b) => b.value - a.value);
+    return Object.values(counts)
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(item => ({
+        label: item.date.toLocaleDateString('es-MX', {
+          month: 'short',
+          year: 'numeric'
+        }),
+        value: item.value,
+        percentage: Math.round((item.value / total) * 100)
+      }));
+  }
+
+
+  getStatusBadgeClass(status: string): string {
+    const classes: Record<string, string> = {
+      Active: 'enterprise-badge enterprise-badge-blue',
+      Resolved: 'enterprise-badge enterprise-badge-green',
+      Recovered: 'enterprise-badge enterprise-badge-green',
+      Cancelled: 'enterprise-badge enterprise-badge-red'
+    };
+
+    return classes[status] ?? 'enterprise-badge enterprise-badge-gray';
+  }
+
+  getReportTypeBadgeClass(type: string): string {
+    const classes: Record<string, string> = {
+      Lost: 'enterprise-badge enterprise-badge-amber',
+      Found: 'enterprise-badge enterprise-badge-blue',
+      Stray: 'enterprise-badge enterprise-badge-gray'
+    };
+
+    return classes[type] ?? 'enterprise-badge enterprise-badge-gray';
+  }
+
+  getSpeciesBadgeClass(species: string): string {
+    const classes: Record<string, string> = {
+      Dog: 'enterprise-badge enterprise-badge-indigo',
+      Cat: 'enterprise-badge enterprise-badge-purple'
+    };
+
+    return classes[species] ?? 'enterprise-badge enterprise-badge-gray';
   }
 
   private buildZoneDistribution(
@@ -206,11 +693,14 @@ export class AnalyticsPageComponent implements OnInit {
     return parts.length >= 2 ? parts[parts.length - 2] : parts[0];
   }
 
-  exportToCsv(): void {
+  exportToExcel(): void {
     const generatedAt = new Date().toLocaleString('es-MX');
 
-    const rows: (string | number | null | undefined)[][] = [
+    const workbook = XLSX.utils.book_new();
+
+    const summaryData = [
       ['REPORTE ANALÍTICO PETRADAR'],
+      [],
       ['Fecha de generación', generatedAt],
       ['Total de reportes filtrados', this.totalReports],
       ['Reportes activos', this.activeReports],
@@ -218,8 +708,14 @@ export class AnalyticsPageComponent implements OnInit {
       ['Avistamientos', this.sightingReports],
       ['Mascotas perdidas', this.lostReports],
       ['Tasa de recuperación', `${this.recoveryRate}%`],
+      [],
+      ['SLO / SLI'],
       ['Tiempo de respuesta API', `${this.responseTimeMs} ms`],
+      ['Objetivo tiempo respuesta', `≤ ${this.responseTimeObjectiveMs} ms`],
+      ['Estado SLO respuesta', this.getResponseTimeStatus()],
       ['Disponibilidad consulta', `${this.availabilityPercentage}%`],
+      ['Objetivo disponibilidad', `${this.availabilityObjective}%`],
+      ['Estado disponibilidad', this.getAvailabilityStatus()],
       ['Errores de carga sesión', this.analyticsErrors],
       [],
       ['FILTROS APLICADOS'],
@@ -227,8 +723,10 @@ export class AnalyticsPageComponent implements OnInit {
       ['Tipo de reporte', this.selectedType || 'Todos'],
       ['Especie', this.selectedSpecies || 'Todas'],
       ['Fecha inicial', this.selectedStartDate || 'Sin filtro'],
-      ['Fecha final', this.selectedEndDate || 'Sin filtro'],
-      [],
+      ['Fecha final', this.selectedEndDate || 'Sin filtro']
+    ];
+
+    const distributionsData = [
       ['DISTRIBUCIÓN POR ESTADO'],
       ['Estado', 'Cantidad', 'Porcentaje'],
       ...this.statusDistribution.map(item => [
@@ -243,8 +741,10 @@ export class AnalyticsPageComponent implements OnInit {
         this.getSpeciesLabel(item.label),
         item.value,
         `${item.percentage}%`
-      ]),
-      [],
+      ])
+    ];
+
+    const trendsData = [
       ['TENDENCIA TEMPORAL'],
       ['Periodo', 'Cantidad', 'Porcentaje'],
       ...this.monthlyTrend.map(item => [
@@ -259,9 +759,10 @@ export class AnalyticsPageComponent implements OnInit {
         item.label,
         item.value,
         `${item.percentage}%`
-      ]),
-      [],
-      ['DETALLE DE REPORTES'],
+      ])
+    ];
+
+    const detailData = [
       [
         'ID',
         'Tipo de reporte',
@@ -273,10 +774,10 @@ export class AnalyticsPageComponent implements OnInit {
         'Longitud'
       ],
       ...this.filteredReports.map(report => [
-        report.id,
-        report.reportType,
-        report.species,
-        report.reportStatus,
+        report.id ?? '',
+        this.getReportTypeLabel(report.reportType ?? ''),
+        this.getSpeciesLabel(report.species ?? ''),
+        this.getStatusLabel(report.reportStatus ?? ''),
         report.incidentDate ?? '',
         report.addressText ?? '',
         report.latitude ?? '',
@@ -284,26 +785,104 @@ export class AnalyticsPageComponent implements OnInit {
       ])
     ];
 
-    const csvContent = rows
-      .map(row =>
-        row
-          .map(value => `"${String(value ?? '').replace(/"/g, '""')}"`)
-          .join(',')
-      )
-      .join('\n');
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    const distributionsSheet = XLSX.utils.aoa_to_sheet(distributionsData);
+    const trendsSheet = XLSX.utils.aoa_to_sheet(trendsData);
+    const detailSheet = XLSX.utils.aoa_to_sheet(detailData);
 
-    const blob = new Blob(['\uFEFF' + csvContent], {
-      type: 'text/csv;charset=utf-8;'
-    });
+    this.applyWorksheetStyle(summarySheet, [34, 32, 24]);
+    this.applyWorksheetStyle(distributionsSheet, [36, 18, 18]);
+    this.applyWorksheetStyle(trendsSheet, [36, 18, 18]);
+    this.applyWorksheetStyle(detailSheet, [12, 22, 18, 18, 26, 70, 16, 16]);
 
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    this.applyMergeRanges(summarySheet, ['A1:C1']);
+    this.applyMergeRanges(distributionsSheet, ['A1:C1', 'A6:C6']);
+    this.applyMergeRanges(trendsSheet, ['A1:C1', 'A6:C6']);
 
-    link.href = url;
-    link.download = `petradar-reporte-analitico-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Resumen');
+    XLSX.utils.book_append_sheet(workbook, distributionsSheet, 'Distribuciones');
+    XLSX.utils.book_append_sheet(workbook, trendsSheet, 'Tendencias y zonas');
+    XLSX.utils.book_append_sheet(workbook, detailSheet, 'Detalle reportes');
 
-    window.URL.revokeObjectURL(url);
+    XLSX.writeFile(
+      workbook,
+      `petradar-reporte-analitico-${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
+  }
+
+ private applyWorksheetStyle(worksheet: XLSX.WorkSheet, columnWidths: number[]): void {
+    worksheet['!cols'] = columnWidths.map(width => ({ width }));
+
+    const range = XLSX.utils.decode_range(worksheet['!ref'] ?? 'A1:A1');
+
+    const titleStyle = {
+      font: { name: 'Arial', sz: 15, bold: true, color: { rgb: 'FFFFFF' } },
+      fill: { fgColor: { rgb: '1E3A8A' } },
+      alignment: { horizontal: 'center', vertical: 'center' },
+      border: this.getExcelBorder()
+    };
+
+    const headerStyle = {
+      font: { name: 'Arial', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+      fill: { fgColor: { rgb: '334155' } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center',
+        wrapText: true
+      },
+      border: this.getExcelBorder()
+    };
+
+    const sectionStyle = {
+      font: { name: 'Arial', sz: 12, bold: true, color: { rgb: '1F2937' } },
+      fill: { fgColor: { rgb: 'E5E7EB' } },
+      alignment: {
+        horizontal: 'left',
+        vertical: 'center',
+        wrapText: true
+      },
+      border: this.getExcelBorder()
+    };
+
+    const bodyStyle = {
+      font: { name: 'Arial', sz: 10, color: { rgb: '111827' } },
+      alignment: {
+        horizontal: 'left',
+        vertical: 'top',
+        wrapText: true
+      },
+      border: this.getExcelBorder()
+    };
+
+    for (let row = range.s.r; row <= range.e.r; row++) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+        const cell = worksheet[cellAddress];
+
+        if (!cell) continue;
+
+        const value = String(cell.v ?? '');
+
+        if (row === 0) {
+          cell.s = titleStyle;
+        } else if (
+          value.includes('DISTRIBUCIÓN') ||
+          value.includes('TENDENCIA') ||
+          value.includes('TOP ZONAS') ||
+          value.includes('SLO') ||
+          value.includes('FILTROS') ||
+          value.includes('DETALLE')
+        ) {
+          cell.s = sectionStyle;
+        } else if (
+          ['Estado', 'Especie', 'Periodo', 'Zona', 'Cantidad', 'Porcentaje', 'ID', 'Tipo de reporte'].includes(value)
+        ) {
+          cell.s = headerStyle;
+        } else {
+          cell.s = bodyStyle;
+        }
+      }
+    }
   }
 
   private buildDistribution(
@@ -331,6 +910,19 @@ export class AnalyticsPageComponent implements OnInit {
         percentage: Math.round((value / total) * 100)
       }))
       .sort((a, b) => b.value - a.value);
+  }
+
+  private getExcelBorder(): any {
+    return {
+      top: { style: 'thin', color: { rgb: 'CBD5E1' } },
+      bottom: { style: 'thin', color: { rgb: 'CBD5E1' } },
+      left: { style: 'thin', color: { rgb: 'CBD5E1' } },
+      right: { style: 'thin', color: { rgb: 'CBD5E1' } }
+    };
+  }
+
+  private applyMergeRanges(worksheet: XLSX.WorkSheet, ranges: string[]): void {
+    worksheet['!merges'] = ranges.map(range => XLSX.utils.decode_range(range));
   }
 
   getStatusLabel(status: string): string {
@@ -386,5 +978,15 @@ export class AnalyticsPageComponent implements OnInit {
     return this.availabilityPercentage >= this.availabilityObjective
       ? 'Dentro del objetivo'
       : 'Fuera del objetivo';
+  }
+
+  getReportTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      Lost: 'Perdido',
+      Found: 'Encontrado',
+      Stray: 'Callejero'
+    };
+
+    return labels[type] ?? type;
   }
 }
