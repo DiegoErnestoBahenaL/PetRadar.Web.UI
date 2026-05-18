@@ -21,341 +21,544 @@
 
     <ng-container *ngIf="!loading && !errorMessage">
 
-      <div class="row">
-        <div class="col-lg-3 col-6">
-          <div class="small-box enterprise-box enterprise-primary">
-            <div class="inner">
-              <h3>{{ totalReports }}</h3>
-              <p>Total de reportes</p>
-            </div>
-            <div class="icon">
-              <i class="fas fa-paw"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-6">
-          <div class="small-box enterprise-box enterprise-success">
-            <div class="inner">
-              <h3>{{ recoveredReports }}</h3>
-              <p>Mascotas recuperadas</p>
-            </div>
-            <div class="icon">
-              <i class="fas fa-check-circle"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-6">
-          <div class="small-box enterprise-box enterprise-warning">
-            <div class="inner">
-              <h3>{{ activeReports }}</h3>
-              <p>Reportes activos</p>
-            </div>
-            <div class="icon">
-              <i class="fas fa-map-marker-alt"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-6">
-          <div class="small-box enterprise-box enterprise-danger">
-            <div class="inner">
-              <h3>{{ recoveryRate }}%</h3>
-              <p>Tasa de recuperación</p>
-            </div>
-            <div class="icon">
-              <i class="fas fa-chart-line"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="card enterprise-card">
-            <div class="card-header">
-              <h3 class="card-title">Distribución por estado</h3>
-            </div>
-
-            <div class="card-body">
-              <div *ngIf="statusDistribution.length === 0" class="text-muted">
-                No hay datos disponibles.
-              </div>
-
-              <div *ngFor="let item of statusDistribution" class="mb-3">
-                <div class="d-flex justify-content-between">
-                  <span>{{ getStatusLabel(item.label) }}</span>
-                  <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
-                </div>
-
-                <div class="progress enterprise-progress">
-                  <div
-                    class="progress-bar enterprise-progress-bar"
-                    role="progressbar"
-                    [style.width.%]="item.percentage">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="card enterprise-card">
-            <div class="card-header">
-              <h3 class="card-title">Distribución por especie</h3>
-            </div>
-
-            <div class="card-body">
-              <div *ngIf="speciesDistribution.length === 0" class="text-muted">
-                No hay datos disponibles.
-              </div>
-
-              <div *ngFor="let item of speciesDistribution" class="mb-3">
-                <div class="d-flex justify-content-between">
-                  <span>{{ getSpeciesLabel(item.label) }}</span>
-                  <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
-                </div>
-
-                <div class="progress enterprise-progress">
-                  <div
-                    class="progress-bar enterprise-progress-bar"
-                    role="progressbar"
-                    [style.width.%]="item.percentage">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="card enterprise-card">
-            <div class="card-header">
-              <h3 class="card-title">Tendencia temporal</h3>
-            </div>
-
-            <div class="card-body">
-              <div *ngIf="monthlyTrend.length === 0" class="text-muted">
-                No hay datos temporales disponibles.
-              </div>
-
-              <div *ngFor="let item of monthlyTrend" class="mb-3">
-                <div class="d-flex justify-content-between">
-                  <span>{{ item.label }}</span>
-                  <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
-                </div>
-
-                <div class="progress enterprise-progress">
-                  <div
-                    class="progress-bar enterprise-progress-bar"
-                    role="progressbar"
-                    [style.width.%]="item.percentage">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="card enterprise-card">
-            <div class="card-header">
-              <h3 class="card-title">Top 5 zonas con más reportes</h3>
-            </div>
-
-            <div class="card-body">
-              <div *ngIf="zoneDistribution.length === 0" class="text-muted">
-                No hay datos geográficos suficientes.
-              </div>
-
-              <div *ngFor="let item of zoneDistribution" class="mb-3">
-                <div class="d-flex justify-content-between">
-                  <span>{{ item.label }}</span>
-                  <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
-                </div>
-
-                <div class="progress enterprise-progress">
-                  <div
-                    class="progress-bar enterprise-progress-bar"
-                    role="progressbar"
-                    [style.width.%]="item.percentage">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SLO / SLI -->
-      <div class="card enterprise-card">
-        <div class="card-header">
-          <h3 class="card-title">Monitoreo de desempeño SLO/SLI</h3>
-        </div>
-
+      <!-- Selector de vista -->
+      <div class="card enterprise-card mb-3">
         <div class="card-body">
-          <div class="row">
+          <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+            <div>
+              <div class="text-muted small text-uppercase fw-semibold">Vista</div>
 
-            <div class="col-md-3">
-              <div class="info-box enterprise-info-box">
-                <span class="info-box-icon enterprise-info-icon">
-                  <i class="fas fa-clock"></i>
-                </span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Tiempo de respuesta</span>
-                  <span class="info-box-number">{{ responseTimeMs }} ms</span>
-                  <small>Objetivo: ≤ {{ responseTimeObjectiveMs }} ms</small>
-                </div>
+              <div class="analytics-view-selector">
+                <button
+                  type="button"
+                  class="btn analytics-view-btn"
+                  [ngClass]="viewMode === 'summary' ? 'active' : ''"
+                  (click)="setViewMode('summary')">
+                  <i class="fas fa-table me-1"></i>
+                  Resumen operativo
+                </button>
+
+                <button
+                  type="button"
+                  class="btn analytics-view-btn"
+                  [ngClass]="viewMode === 'charts' ? 'active' : ''"
+                  (click)="setViewMode('charts')">
+                  <i class="fas fa-chart-pie me-1"></i>
+                  Gráficas avanzadas
+                </button>
               </div>
             </div>
 
-            <div class="col-md-3">
-              <div class="info-box enterprise-info-box">
-                <span class="info-box-icon enterprise-info-icon">
-                  <i class="fas fa-server"></i>
-                </span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Disponibilidad consulta</span>
-                  <span class="info-box-number">{{ availabilityPercentage }}%</span>
-                  <small>{{ availabilityStatus }}</small>
-                </div>
-              </div>
+            <div class="text-muted small align-self-lg-end">
+              {{ filteredReports.length }} reportes analizados
             </div>
-
-            <div class="col-md-3">
-              <div class="info-box enterprise-info-box">
-                <span class="info-box-icon enterprise-info-icon">
-                  <i class="fas fa-bullseye"></i>
-                </span>
-                <div class="info-box-content">
-                  <span class="info-box-text">SLO respuesta</span>
-                  <span class="info-box-number">{{ getResponseTimeStatus() }}</span>
-                  <small>SLI medido desde frontend</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="info-box enterprise-info-box">
-                <span class="info-box-icon enterprise-info-icon">
-                  <i class="fas fa-exclamation-triangle"></i>
-                </span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Errores de carga</span>
-                  <span class="info-box-number">{{ analyticsErrors }}</span>
-                  <small>Durante la sesión actual</small>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
 
-      <div class="card enterprise-card">
-        <div class="card-header">
-          <h3 class="card-title">Filtros de analítica</h3>
-        </div>
+      <!-- Vista resumen -->
+      <ng-container *ngIf="viewMode === 'summary'">
 
-        <div class="card-body">
-          <div class="row">
-
-            <div class="col-md-3">
-              <label>Estado</label>
-              <select class="form-control" [(ngModel)]="selectedStatus" (change)="applyFilters()">
-                <option value="">Todos</option>
-                <option value="Active">Activo</option>
-                <option value="Resolved">Resuelto</option>
-                <option value="Recovered">Recuperado</option>
-                <option value="Cancelled">Cancelado</option>
-              </select>
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <div class="small-box enterprise-box enterprise-primary">
+              <div class="inner">
+                <h3>{{ totalReports }}</h3>
+                <p>Total de reportes</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-paw"></i>
+              </div>
             </div>
-
-            <div class="col-md-3">
-              <label>Tipo de reporte</label>
-              <select class="form-control" [(ngModel)]="selectedType" (change)="applyFilters()">
-                <option value="">Todos</option>
-                <option value="Lost">Perdido</option>
-                <option value="Found">Encontrado</option>
-                <option value="Stray">Callejero</option>
-              </select>
-            </div>
-
-            <div class="col-md-3">
-              <label>Especie</label>
-              <select class="form-control" [(ngModel)]="selectedSpecies" (change)="applyFilters()">
-                <option value="">Todas</option>
-                <option value="Dog">Perro</option>
-                <option value="Cat">Gato</option>
-              </select>
-            </div>
-
-            <div class="col-md-3">
-              <label>Fecha inicial</label>
-              <input
-                type="date"
-                class="form-control"
-                [(ngModel)]="selectedStartDate"
-                (change)="applyFilters()">
-            </div>
-
-            <div class="col-md-3 mt-3">
-              <label>Fecha final</label>
-              <input
-                type="date"
-                class="form-control"
-                [(ngModel)]="selectedEndDate"
-                (change)="applyFilters()">
-            </div>
-
           </div>
 
-          <button class="btn btn-secondary mt-3" (click)="clearFilters()">
-            Limpiar filtros
-          </button>
+          <div class="col-lg-3 col-6">
+            <div class="small-box enterprise-box enterprise-success">
+              <div class="inner">
+                <h3>{{ recoveredReports }}</h3>
+                <p>Mascotas recuperadas</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+            </div>
+          </div>
 
-          <button
-            class="btn enterprise-btn-primary mt-3 ml-2"
-            (click)="exportToCsv()"
-            [disabled]="filteredReports.length === 0">
-            <i class="fas fa-file-csv"></i>
-            Exportar CSV
-          </button>
-        </div>
-      </div>
+          <div class="col-lg-3 col-6">
+            <div class="small-box enterprise-box enterprise-warning">
+              <div class="inner">
+                <h3>{{ activeReports }}</h3>
+                <p>Reportes activos</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+            </div>
+          </div>
 
-      <div class="card enterprise-card">
-        <div class="card-header">
-          <h3 class="card-title">Reportes analizados</h3>
+          <div class="col-lg-3 col-6">
+            <div class="small-box enterprise-box enterprise-danger">
+              <div class="inner">
+                <h3>{{ recoveryRate }}%</h3>
+                <p>Tasa de recuperación</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="card-body table-responsive p-0">
-          <table class="table table-hover text-nowrap enterprise-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Tipo</th>
-                <th>Especie</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let report of filteredReports">
-                <td>{{ report.id }}</td>
-                <td>{{ report.reportType }}</td>
-                <td>{{ report.species }}</td>
-                <td>{{ report.reportStatus }}</td>
-                <td>{{ report.incidentDate | date:'dd/MM/yyyy' }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Distribución por estado</h3>
+              </div>
+
+              <div class="card-body">
+                <div *ngIf="statusDistribution.length === 0" class="text-muted">
+                  No hay datos disponibles.
+                </div>
+
+                <div *ngFor="let item of statusDistribution" class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>{{ getStatusLabel(item.label) }}</span>
+                    <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
+                  </div>
+
+                  <div class="progress enterprise-progress">
+                    <div
+                      class="progress-bar enterprise-progress-bar"
+                      role="progressbar"
+                      [style.width.%]="item.percentage">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Distribución por especie</h3>
+              </div>
+
+              <div class="card-body">
+                <div *ngIf="speciesDistribution.length === 0" class="text-muted">
+                  No hay datos disponibles.
+                </div>
+
+                <div *ngFor="let item of speciesDistribution" class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>{{ getSpeciesLabel(item.label) }}</span>
+                    <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
+                  </div>
+
+                  <div class="progress enterprise-progress">
+                    <div
+                      class="progress-bar enterprise-progress-bar"
+                      role="progressbar"
+                      [style.width.%]="item.percentage">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Tendencia temporal</h3>
+              </div>
+
+              <div class="card-body">
+                <div *ngIf="monthlyTrend.length === 0" class="text-muted">
+                  No hay datos temporales disponibles.
+                </div>
+
+                <div *ngFor="let item of monthlyTrend" class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>{{ item.label }}</span>
+                    <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
+                  </div>
+
+                  <div class="progress enterprise-progress">
+                    <div
+                      class="progress-bar enterprise-progress-bar"
+                      role="progressbar"
+                      [style.width.%]="item.percentage">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--<div class="col-md-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Top 5 zonas con más reportes</h3>
+              </div>
+
+              <div class="card-body">
+                <div *ngIf="zoneDistribution.length === 0" class="text-muted">
+                  No hay datos geográficos suficientes.
+                </div>
+
+                <div *ngFor="let item of zoneDistribution" class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>{{ item.label }}</span>
+                    <strong>{{ item.value }} reportes · {{ item.percentage }}%</strong>
+                  </div>
+
+                  <div class="progress enterprise-progress">
+                    <div
+                      class="progress-bar enterprise-progress-bar"
+                      role="progressbar"
+                      [style.width.%]="item.percentage">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> -->
+        </div>
+
+        <!-- SLO / SLI -->
+        <div class="card enterprise-card">
+          <div class="card-header">
+            <h3 class="card-title">Monitoreo de desempeño SLO/SLI</h3>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+
+              <div class="col-md-3">
+                <div class="info-box enterprise-info-box">
+                  <span class="info-box-icon enterprise-info-icon">
+                    <i class="fas fa-clock"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Tiempo de respuesta</span>
+                    <span class="info-box-number">{{ responseTimeMs }} ms</span>
+                    <small>Objetivo: ≤ {{ responseTimeObjectiveMs }} ms</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="info-box enterprise-info-box">
+                  <span class="info-box-icon enterprise-info-icon">
+                    <i class="fas fa-server"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Disponibilidad consulta</span>
+                    <span class="info-box-number">{{ availabilityPercentage }}%</span>
+                    <small>{{ availabilityStatus }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="info-box enterprise-info-box">
+                  <span class="info-box-icon enterprise-info-icon">
+                    <i class="fas fa-bullseye"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">SLO respuesta</span>
+                    <span class="info-box-number">{{ getResponseTimeStatus() }}</span>
+                    <small>SLI medido desde frontend</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="info-box enterprise-info-box">
+                  <span class="info-box-icon enterprise-info-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Errores de carga</span>
+                    <span class="info-box-number">{{ analyticsErrors }}</span>
+                    <small>Durante la sesión actual</small>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Métricas avanzadas -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="info-box enterprise-info-box">
+              <span class="info-box-icon enterprise-info-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">Cobertura geográfica</span>
+                <span class="info-box-number">{{ geolocationCoverageRate }}%</span>
+                <small>{{ geolocatedReports }} reportes con coordenadas</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="info-box enterprise-info-box">
+              <span class="info-box-icon enterprise-info-icon">
+                <i class="fas fa-image"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">Cobertura fotográfica</span>
+                <span class="info-box-number">{{ photoCoverageRate }}%</span>
+                <small>{{ reportsWithPhoto }} reportes con imagen</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="info-box enterprise-info-box">
+              <span class="info-box-icon enterprise-info-icon">
+                <i class="fas fa-eye"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">Visualizaciones</span>
+                <span class="info-box-number">{{ totalViews }}</span>
+                <small>Promedio: {{ averageViews }} por reporte</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="info-box enterprise-info-box">
+              <span class="info-box-icon enterprise-info-icon">
+                <i class="fas fa-database"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">Calidad de datos</span>
+                <span class="info-box-number">{{ dataQualityScore }}%</span>
+                <small>Completitud general</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card enterprise-card">
+          <div class="card-header">
+            <h3 class="card-title">Filtros de analítica</h3>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+
+              <div class="col-md-3">
+                <label>Estado</label>
+                <select class="form-control" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+                  <option value="">Todos</option>
+                  <option value="Active">Activo</option>
+                  <option value="Resolved">Resuelto</option>
+                  <option value="Recovered">Recuperado</option>
+                  <option value="Cancelled">Cancelado</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label>Tipo de reporte</label>
+                <select class="form-control" [(ngModel)]="selectedType" (change)="applyFilters()">
+                  <option value="">Todos</option>
+                  <option value="Lost">Perdido</option>
+                  <option value="Found">Encontrado</option>
+                  <option value="Stray">Callejero</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label>Especie</label>
+                <select class="form-control" [(ngModel)]="selectedSpecies" (change)="applyFilters()">
+                  <option value="">Todas</option>
+                  <option value="Dog">Perro</option>
+                  <option value="Cat">Gato</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label>Fecha inicial</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="selectedStartDate"
+                  (change)="applyFilters()">
+              </div>
+
+              <div class="col-md-3 mt-3">
+                <label>Fecha final</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="selectedEndDate"
+                  (change)="applyFilters()">
+              </div>
+
+            </div>
+
+            <button class="btn btn-secondary mt-3" (click)="clearFilters()">
+              Limpiar filtros
+            </button>
+
+            <button
+              class="btn enterprise-btn-primary mt-3 ml-2"
+              (click)="exportToExcel()"
+              [disabled]="filteredReports.length === 0">
+              <i class="fas fa-file-excel"></i>
+              Exportar Excel
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card enterprise-card">
+          <div class="card-header">
+            <h3 class="card-title">Reportes analizados</h3>
+          </div>
+
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap enterprise-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Especie</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let report of filteredReports">
+                  <td>{{ report.id }}</td>
+
+                  <td>
+                    <span [class]="getReportTypeBadgeClass(report.reportType ?? '')">
+                      {{ getReportTypeLabel(report.reportType ?? '') }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span [class]="getSpeciesBadgeClass(report.species ?? '')">
+                      {{ getSpeciesLabel(report.species ?? '') }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span [class]="getStatusBadgeClass(report.reportStatus ?? '')">
+                      {{ getStatusLabel(report.reportStatus ?? '') }}
+                    </span>
+                  </td>
+
+                  <td>{{ report.incidentDate | date:'dd/MM/yyyy' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- Vista gráficas avanzadas -->
+      <ng-container *ngIf="viewMode === 'charts'">
+
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Distribución por estado</h3>
+              </div>
+              <div class="card-body chart-card-body">
+                <canvas id="statusChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Distribución por especie</h3>
+              </div>
+              <div class="card-body chart-card-body">
+                <canvas id="speciesChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+         <div class="row">
+          <div class="col-lg-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Tendencia temporal</h3>
+              </div>
+              <div class="card-body chart-card-body">
+                <canvas id="monthlyTrendChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!--<div class="col-lg-6">
+            <div class="card enterprise-card">
+              <div class="card-header">
+                <h3 class="card-title">Top zonas con más reportes</h3>
+              </div>
+              <div class="card-body chart-card-body">
+                <canvas id="zoneChart"></canvas>
+              </div>
+            </div>
+          </div>-->
+
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="card enterprise-card">
+                <div class="card-header">
+                  <h3 class="card-title">Calidad de datos del reporte</h3>
+                </div>
+                <div class="card-body chart-card-body">
+                  <canvas id="dataQualityRadarChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+             <!--<div class="col-lg-6">
+              <div class="card enterprise-card">
+                <div class="card-header">
+                  <h3 class="card-title">Recompensa vs visualizaciones</h3>
+                </div>
+                <div class="card-body chart-card-body">
+                  <canvas id="rewardViewsScatterChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
+           <!-- <div class="row">
+            <div class="col-lg-6">
+              <div class="card enterprise-card">
+                <div class="card-header">
+                  <h3 class="card-title">Radio de búsqueda vs visualizaciones</h3>
+                </div>
+                <div class="card-body chart-card-body">
+                  <canvas id="radiusViewsBubbleChart"></canvas>
+                </div>
+              </div>
+            </div> -->
+          </div> 
+        </div> 
+
+      </ng-container>
 
     </ng-container>
 

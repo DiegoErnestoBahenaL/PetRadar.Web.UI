@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatchesHttpService, MatchViewModel } from './matches-http.service';
+import { ReportsHttpService } from '../heatmap/reports-http.service';
 
 type MatchStatus = 'Pending' | 'Confirmed' | 'Dismissed';
 
@@ -18,9 +19,13 @@ export class MatchesPageComponent {
   private readonly router = inject(Router);
   private readonly matchesService = inject(MatchesHttpService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly reportsService = inject(ReportsHttpService);
 
   matches: MatchViewModel[] = [];
   filteredMatches: MatchViewModel[] = [];
+
+  reportImageUrls: Record<number, string> = {};
+  loadingReportImages = new Set<number>();
 
   isLoading = false;
   loadError = '';
@@ -30,6 +35,12 @@ export class MatchesPageComponent {
   matchActionError = '';
 
   searchTerm = '';
+
+  viewMode: 'table' | 'cards' = 'table';
+
+  setViewMode(mode: 'table' | 'cards'): void {
+    this.viewMode = mode;
+  }
 
   constructor() {
     this.loadMatches();
@@ -54,6 +65,43 @@ export class MatchesPageComponent {
           this.isLoading = false;
         },
       });
+  }
+
+  loadReportImage(reportId?: number | null): void {
+    if (!reportId) return;
+
+    if (this.reportImageUrls[reportId] || this.loadingReportImages.has(reportId)) {
+      return;
+    }
+
+    this.loadingReportImages.add(reportId);
+
+    this.reportsService.getReportMainPicture(reportId).subscribe({
+      next: (blob) => {
+        this.reportImageUrls[reportId] = URL.createObjectURL(blob);
+        this.loadingReportImages.delete(reportId);
+      },
+      error: () => {
+        this.reportImageUrls[reportId] = 'assets/img/pet-placeholder.png';
+        this.loadingReportImages.delete(reportId);
+      },
+    });
+  }
+
+  getReportMainImage(reportId?: number | null): string {
+    if (!reportId) return 'assets/img/pet-placeholder.png';
+
+    this.loadReportImage(reportId);
+
+    return this.reportImageUrls[reportId] ?? 'assets/img/pet-placeholder.png';
+  }
+
+  ngOnDestroy(): void {
+    Object.values(this.reportImageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
   }
 
   applySearch(): void {
@@ -119,6 +167,17 @@ export class MatchesPageComponent {
       default:
         return value || 'N/D';
     }
+  }
+
+  translateSpecies(species?: string | null): string {
+    if (!species) return 'N/D';
+
+    const normalized = species.trim().toLowerCase();
+
+    if (normalized === 'dog') return 'Perro';
+    if (normalized === 'cat') return 'Gato';
+
+    return species;
   }
 
   getMatchStatusBadgeClass(value?: string | null): string {

@@ -33,10 +33,13 @@
     "@fortawesome/fontawesome-free": "^7.2.0",
     "admin-lte": "^4.0.0-rc6",
     "bootstrap": "^5.3.8",
+    "chart.js": "^4.5.1",
+    "file-saver": "^2.0.5",
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx-js-style": "^1.2.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

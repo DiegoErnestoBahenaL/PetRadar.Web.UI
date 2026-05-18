@@ -72,3 +72,58 @@
   background-color: #334155 !important;
   color: #ffffff;
 }
+
+.enterprise-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+}
+
+.enterprise-badge-blue {
+  color: #1e3a8a;
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.enterprise-badge-green {
+  color: #065f46;
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.enterprise-badge-red {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.enterprise-badge-amber {
+  color: #92400e;
+  background-color: #fffbeb;
+  border-color: #fde68a;
+}
+
+.enterprise-badge-indigo {
+  color: #3730a3;
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.enterprise-badge-purple {
+  color: #6b21a8;
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.enterprise-badge-gray {
+  color: #374151;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
