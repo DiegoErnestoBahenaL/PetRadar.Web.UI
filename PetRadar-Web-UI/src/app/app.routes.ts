@@ -15,6 +15,7 @@ import { ProfilePageComponent } from './profile/profile-page.component';
 import { RoleEnum } from './services/permission.service';
 import { LandingPage } from './landing-page/landing-page';
 import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy';
+import { DonationsComponent } from './donations/donations';
 
 export const routes: Routes = [
   // Public
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'registro', component: RegisterComponent },
   {path: 'login', component: LoginComponent},
   { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'donaciones', component: DonationsComponent },
 
   // Private 
   {
