@@ -12,6 +12,7 @@ import { PetSexEnum } from '../api/petradar/model/petSexEnum';
 import { PetSizeEnum } from '../api/petradar/model/petSizeEnum';
 
 import { ViewChild, ElementRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 export type PetDialogData =
   | { mode: 'create' }
@@ -81,6 +82,26 @@ export class PetDialogComponent {
     allergies: ['' as string | null],
     medicalNotes: ['' as string | null],
   });
+
+  selectedMainImage: File | null = null;
+
+  onMainImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedMainImage = input.files?.[0] ?? null;
+  }
+
+  private http = inject(HttpClient);
+  private uploadMainPicture(petId: number, file: File): void {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http
+      .put(`https://api-qa.petradar-qa.org/api/UserPets/${petId}/mainpicture`, formData)
+      .subscribe({
+        next: () => this.closed.emit(true),
+        error: () => this.closed.emit(true),
+      });
+  }
 
   private initFromData() {
     this.errorMsg = null;

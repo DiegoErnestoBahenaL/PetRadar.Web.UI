@@ -267,3 +267,50 @@
   transform: none;
   box-shadow: none;
 }
+
+.breed-predictions {
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(226, 232, 240, .95);
+  border-radius: 14px;
+  padding: .75rem;
+}
+
+.breed-predictions-title {
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: .04em;
+  margin-bottom: .55rem;
+}
+
+.breed-prediction-item {
+  padding: .4rem 0;
+  border-bottom: 1px solid rgba(226, 232, 240, .75);
+}
+
+.breed-prediction-item:last-child {
+  border-bottom: 0;
+}
+
+.breed-prediction-item span {
+  font-size: .85rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.breed-prediction-item strong {
+  font-size: .82rem;
+  color: #0f172a;
+}
+
+.breed-confidence-progress {
+  height: .35rem;
+  margin-top: .35rem;
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+.breed-confidence-progress .progress-bar {
+  border-radius: 999px;
+}

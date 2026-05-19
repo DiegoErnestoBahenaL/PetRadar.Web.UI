@@ -17,7 +17,7 @@
             <div>
               <div class="text-muted small text-uppercase fw-semibold">Vista</div>
 
-              <div class="match-view-selector">
+              <div class="match-view-selector mt-1">
                 <button
                   type="button"
                   class="btn match-view-btn"
@@ -131,7 +131,7 @@
                         </div>
 
                         <div>
-                          <span>Raza</span>
+                          <span>Raza principal</span>
                           <strong>{{ match.lostReport?.breed ?? 'N/D' }}</strong>
                         </div>
 
@@ -140,9 +140,45 @@
                           <strong>{{ match.lostReport?.color ?? 'N/D' }}</strong>
                         </div>
 
-                        <div>
-                          <span>Estado</span>
-                          <strong>{{ match.lostReport?.reportStatus ?? 'N/D' }}</strong>
+                        <!--<div>
+                          <span>Patrón</span>
+                          <strong>{{ match.lostReport?.colorPattern ?? 'N/D' }}</strong>
+                        </div>-->
+                      </div>
+
+                      <div class="breed-predictions mt-3">
+                        <div class="breed-predictions-title">
+                          Razas secundarias detectadas
+                        </div>
+
+                        <div
+                          class="breed-prediction-item"
+                          *ngFor="let prediction of getSecondaryBreedPredictions(match.lostReport)"
+                        >
+                          <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span>
+                              #{{ prediction.rank }} {{ prediction.breed ?? 'N/D' }}
+                            </span>
+
+                            <strong>
+                              {{ formatConfidence(prediction.confidence) }}
+                            </strong>
+                          </div>
+
+                          <div class="progress breed-confidence-progress">
+                            <div
+                              class="progress-bar"
+                              role="progressbar"
+                              [style.width]="formatConfidence(prediction.confidence)"
+                            ></div>
+                          </div>
+                        </div>
+
+                        <div
+                          *ngIf="!getSecondaryBreedPredictions(match.lostReport).length"
+                          class="text-muted small"
+                        >
+                          Sin razas secundarias disponibles.
                         </div>
                       </div>
 
@@ -193,7 +229,7 @@
                         </div>
 
                         <div>
-                          <span>Raza</span>
+                          <span>Raza principal</span>
                           <strong>{{ match.strayReport?.breed ?? 'N/D' }}</strong>
                         </div>
 
@@ -202,9 +238,45 @@
                           <strong>{{ match.strayReport?.color ?? 'N/D' }}</strong>
                         </div>
 
-                        <div>
-                          <span>Estado</span>
-                          <strong>{{ match.strayReport?.reportStatus ?? 'N/D' }}</strong>
+                        <!--<div>
+                          <span>Patrón</span>
+                          <strong>{{ match.strayReport?.colorPattern ?? 'N/D' }}</strong>
+                        </div>-->
+                      </div>
+
+                      <div class="breed-predictions mt-3">
+                        <div class="breed-predictions-title">
+                          Razas secundarias detectadas
+                        </div>
+
+                        <div
+                          class="breed-prediction-item"
+                          *ngFor="let prediction of getSecondaryBreedPredictions(match.strayReport)"
+                        >
+                          <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span>
+                              #{{ prediction.rank }} {{ prediction.breed ?? 'N/D' }}
+                            </span>
+
+                            <strong>
+                              {{ formatConfidence(prediction.confidence) }}
+                            </strong>
+                          </div>
+
+                          <div class="progress breed-confidence-progress">
+                            <div
+                              class="progress-bar"
+                              role="progressbar"
+                              [style.width]="formatConfidence(prediction.confidence)"
+                            ></div>
+                          </div>
+                        </div>
+
+                        <div
+                          *ngIf="!getSecondaryBreedPredictions(match.strayReport).length"
+                          class="text-muted small"
+                        >
+                          Sin razas secundarias disponibles.
                         </div>
                       </div>
 
@@ -288,7 +360,7 @@
                     >
                       <button
                         type="button"
-                        class="btn btn-sm btn-outline-success"
+                        class="btn table-action-btn table-action-success"
                         [disabled]="updatingMatchId === match.id"
                         (click)="confirmMatch(match)"
                       >
@@ -298,7 +370,7 @@
 
                       <button
                         type="button"
-                        class="btn btn-sm btn-outline-danger"
+                        class="btn table-action-btn table-action-danger"
                         [disabled]="updatingMatchId === match.id"
                         (click)="dismissMatch(match)"
                       >
@@ -312,7 +384,7 @@
                     >
                       <button
                         type="button"
-                        class="btn table-action-btn table-action-danger"
+                        class="btn table-action-btn table-action-warning"
                         [disabled]="updatingMatchId === match.id"
                         (click)="restoreToPending(match)"
                       >
@@ -333,7 +405,7 @@
 
                       <button
                         type="button"
-                         class="btn table-action-btn table-action-secondary"
+                        class="btn table-action-btn table-action-secondary"
                         (click)="openReportDetail(match.strayReport?.id)"
                       >
                         Ver encontrado
