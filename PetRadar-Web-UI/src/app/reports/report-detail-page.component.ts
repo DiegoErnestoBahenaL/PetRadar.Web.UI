@@ -7,6 +7,7 @@ import { ReportsHttpService } from '../heatmap/reports-http.service';
 import { ReportViewModel } from '../heatmap/report.model';
 import { forkJoin } from 'rxjs';
 
+
 @Component({
   selector: 'app-report-detail-page',
   standalone: true,
@@ -26,7 +27,12 @@ export class ReportDetailPageComponent {
   reportMainPictureUrl: string | null = null;
   additionalPhotoUrls: string[] = [];
 
+  returnTo = '/app/heatmap';
+
+  
   ngOnInit(): void {
+
+    this.returnTo = this.route.snapshot.queryParamMap.get('returnTo') ?? '/app/heatmap';
     this.route.paramMap
       .pipe(
         takeUntilDestroyed(this.destroyRef),
@@ -56,7 +62,7 @@ export class ReportDetailPageComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/app/heatmap']);
+    this.router.navigateByUrl(this.returnTo);
   }
 
   formatDate(value?: string | null): string {

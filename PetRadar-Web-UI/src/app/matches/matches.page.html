@@ -140,11 +140,17 @@
                           <strong>{{ match.lostReport?.color ?? 'N/D' }}</strong>
                         </div>
 
+                        <div>
+                          <span>Confianza raza</span>
+                          <strong>{{ formatConfidence(getMainBreedConfidence(match.lostReport)) }}</strong>
+                        </div>
                         <!--<div>
                           <span>Patrón</span>
                           <strong>{{ match.lostReport?.colorPattern ?? 'N/D' }}</strong>
                         </div>-->
                       </div>
+
+                   
 
                       <div class="breed-predictions mt-3">
                         <div class="breed-predictions-title">
@@ -238,11 +244,18 @@
                           <strong>{{ match.strayReport?.color ?? 'N/D' }}</strong>
                         </div>
 
+
+                        <div>
+                          <span>Confianza raza</span>
+                          <strong>{{ formatConfidence(getMainBreedConfidence(match.strayReport)) }}</strong>
+                       </div>
                         <!--<div>
                           <span>Patrón</span>
                           <strong>{{ match.strayReport?.colorPattern ?? 'N/D' }}</strong>
                         </div>-->
                       </div>
+
+                      
 
                       <div class="breed-predictions mt-3">
                         <div class="breed-predictions-title">
