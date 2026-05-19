@@ -46,6 +46,8 @@ export class MatchesPageComponent {
     this.loadMatches();
   }
 
+  
+
   private loadMatches(): void {
     this.isLoading = true;
     this.loadError = '';
@@ -102,6 +104,12 @@ export class MatchesPageComponent {
         URL.revokeObjectURL(url);
       }
     });
+  }
+
+  
+
+  getMainBreedConfidence(report: any): number | null {
+    return report?.imageAnalysisResult?.confidence ?? null;
   }
 
   applySearch(): void {
@@ -197,7 +205,7 @@ export class MatchesPageComponent {
 
     return `${Math.round(value)}%`;
   }
-  
+
   getMatchStatusBadgeClass(value?: string | null): string {
     switch (value) {
       case 'Pending':
@@ -225,7 +233,9 @@ export class MatchesPageComponent {
 
   openReportDetail(reportId?: number | null): void {
     if (!reportId) return;
-    this.router.navigate(['/app/reports', reportId]);
+      this.router.navigate(['/app/reports', reportId], {
+      queryParams: { returnTo: '/app/matches' },
+    });
   }
 
   canConfirmOrDismiss(match: MatchViewModel): boolean {

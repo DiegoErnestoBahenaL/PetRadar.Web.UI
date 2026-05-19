@@ -158,6 +158,59 @@ export class AnalyticsPageComponent implements OnInit {
     });
   }
 
+  reportSearchTerm = '';
+  reportPage = 1;
+  reportPageSize = 10;
+  reportPageSizeOptions = [5, 10, 25, 50];
+
+  get searchedReports(): ReportViewModel[] {
+    const term = this.reportSearchTerm.trim().toLowerCase();
+
+    if (!term) return this.filteredReports;
+
+    return this.filteredReports.filter((report) => {
+      const haystack = [
+        report.id,
+        this.getReportTypeLabel(report.reportType ?? ''),
+        this.getSpeciesLabel(report.species ?? ''),
+        this.getStatusLabel(report.reportStatus ?? ''),
+        report.incidentDate,
+        report.addressText,
+      ]
+        .filter((value) => value != null)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
+  }
+
+  get pagedReports(): ReportViewModel[] {
+    const start = (this.reportPage - 1) * this.reportPageSize;
+    return this.searchedReports.slice(start, start + this.reportPageSize);
+  }
+
+  get reportTotalPages(): number {
+    return Math.max(1, Math.ceil(this.searchedReports.length / this.reportPageSize));
+  }
+
+  applyReportSearch(): void {
+    this.reportPage = 1;
+  }
+
+  setReportPageSize(size: number): void {
+    this.reportPageSize = Number(size);
+    this.reportPage = 1;
+  }
+
+  prevReportPage(): void {
+    this.reportPage = Math.max(1, this.reportPage - 1);
+  }
+
+  nextReportPage(): void {
+    this.reportPage = Math.min(this.reportTotalPages, this.reportPage + 1);
+  }
+
 
   private getDataQualityRadarValues(): number[] {
     const total = this.filteredReports.length;
@@ -419,6 +472,7 @@ export class AnalyticsPageComponent implements OnInit {
       const matchesStartDate = !startDate || (reportDate !== null && reportDate >= startDate);
       const matchesEndDate = !endDate || (reportDate !== null && reportDate <= endDate);
 
+      this.reportPage = 1;
       return matchesStatus &&
         matchesType &&
         matchesSpecies &&
@@ -441,6 +495,7 @@ export class AnalyticsPageComponent implements OnInit {
 
     this.calculateKpis();
     this.calculateDistributions();
+    this.reportPage = 1;
   }
 
   private calculateDistributions(): void {
@@ -769,7 +824,7 @@ private buildColorDistribution(
         'Especie',
         'Estado',
         'Fecha incidente',
-        'Ubicación textual',
+        //'Ubicación textual',
         'Latitud',
         'Longitud'
       ],
@@ -779,7 +834,7 @@ private buildColorDistribution(
         this.getSpeciesLabel(report.species ?? ''),
         this.getStatusLabel(report.reportStatus ?? ''),
         report.incidentDate ?? '',
-        report.addressText ?? '',
+        //report.addressText ?? '',
         report.latitude ?? '',
         report.longitude ?? ''
       ])

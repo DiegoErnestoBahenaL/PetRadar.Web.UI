@@ -267,7 +267,11 @@ private getUserIdFromToken(): number | null {
   openCreate(): void {
     if (!this.canManageOwnPets) return;
 
-    this.modalData = { mode: 'create' };
+    this.modalData = {
+      mode: 'create',
+      userId: this.currentUserId ?? undefined,
+    } as any;
+
     this.modalOpen = true;
   }
 
@@ -286,6 +290,15 @@ private getUserIdFromToken(): number | null {
       this.modalData.mode === 'create' ? 'Mascota creada' : 'Mascota actualizada',
       'success'
     );
+
+    Object.values(this.petImageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    this.petImageUrls = {};
+    this.loadingPetImages.clear();
 
     this.load();
   }
