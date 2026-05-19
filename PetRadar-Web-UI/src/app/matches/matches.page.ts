@@ -180,6 +180,24 @@ export class MatchesPageComponent {
     return species;
   }
 
+  getSecondaryBreedPredictions(report: any): any[] {
+    const predictions = report?.imageAnalysisResult?.topPredictions ?? [];
+
+    return predictions
+      .filter((prediction: any) => prediction?.breed)
+      .slice(0, 3);
+  }
+
+  formatConfidence(confidence?: number | null): string {
+    if (confidence === null || confidence === undefined) {
+      return '0%';
+    }
+
+    const value = confidence <= 1 ? confidence * 100 : confidence;
+
+    return `${Math.round(value)}%`;
+  }
+  
   getMatchStatusBadgeClass(value?: string | null): string {
     switch (value) {
       case 'Pending':
