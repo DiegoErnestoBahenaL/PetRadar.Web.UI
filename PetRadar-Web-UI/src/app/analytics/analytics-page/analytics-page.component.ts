@@ -1006,21 +1006,28 @@ private buildColorDistribution(
 
     this.totalReports = base.length;
 
-    this.activeReports = base.filter(r => r.reportStatus === 'Active').length;
+    this.activeReports = base.filter(
+      r => r.reportStatus === 'Active'
+    ).length;
 
-    this.recoveredReports = base.filter(
-      r => r.reportStatus === 'Resolved' || r.reportStatus === 'Recovered'
+    this.lostReports = base.filter(
+      r => r.reportType === 'Lost'
     ).length;
 
     this.sightingReports = base.filter(
       r => r.reportType === 'Found' || r.reportType === 'Stray'
     ).length;
 
-    this.lostReports = base.filter(r => r.reportType === 'Lost').length;
+    this.recoveredReports = base.filter(
+      r =>
+        r.reportType === 'Lost' &&
+        (r.reportStatus === 'Resolved' || r.reportStatus === 'Recovered')
+    ).length;
 
-    this.recoveryRate = this.lostReports > 0
-      ? Math.round((this.recoveredReports / this.lostReports) * 100)
-      : 0;
+    this.recoveryRate =
+      this.lostReports > 0
+        ? Math.round((this.recoveredReports / this.lostReports) * 100)
+        : 0;
   }
 
   getResponseTimeStatus(): string {
