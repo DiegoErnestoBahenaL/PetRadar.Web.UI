@@ -129,6 +129,33 @@
             No hay reportes que coincidan con los filtros actuales.
           </div>
 
+          <div
+            *ngIf="filteredReports.length"
+            class="d-flex flex-column flex-lg-row justify-content-between gap-3 p-3 border-bottom"
+          >
+            <div class="input-group input-group-sm" style="max-width: 360px;">
+              <input
+                class="form-control"
+                placeholder="Buscar reporte..."
+                [(ngModel)]="reportSearchTerm"
+                (input)="applyReportSearch()"
+              />
+
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                (click)="reportSearchTerm=''; applyReportSearch()"
+                [disabled]="!reportSearchTerm"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div class="text-muted small align-self-lg-center">
+              {{ searchedReports.length }} resultados
+            </div>
+          </div>
+
           <div *ngIf="filteredReports.length" class="table-responsive">
             <table class="table table-hover table-striped table-bordered align-middle mb-0">
               <thead class="table-light">
@@ -138,7 +165,7 @@
                   <th>Especie</th>
                   <th>Estado</th>
                   <th>Fecha</th>
-                  <th>Ubicación</th>
+                  
                   <th class="text-center">Acción</th>
                   <th class="text-center">Detalle</th>
                 </tr>
@@ -146,7 +173,7 @@
 
               <tbody>
                 <tr
-                  *ngFor="let report of filteredReports"
+                  *ngFor="let report of pagedReports"
                   (click)="onReportSelected(report)"
                   style="cursor: pointer"
                   [class.table-primary]="report.id === selectedReportId"
@@ -167,33 +194,39 @@
 
                   <td>{{ formatDate(report.incidentDate) }}</td>
 
-                  <td class="text-truncate report-location-cell">
+                  <!--<td class="text-truncate report-location-cell">
                     {{ getShortLocation(report) }}
-                  </td>
+                  </td> -->
+                    <td class="text-center">
+                    <ng-container *ngIf="canManageReports; else reportActionNotAvailable">
+                      <button
+                        *ngIf="canToggleStatus(report)"
+                        type="button"
+                        class="btn table-action-btn"
+                        [ngClass]="
+                          report.reportStatus === 'Active'
+                            ? 'table-action-danger'
+                            : 'table-action-success'
+                        "
+                        [disabled]="updatingReportId === report.id"
+                        (click)="toggleReportStatus(report, $event)"
+                      >
+                        <span *ngIf="updatingReportId === report.id">Guardando...</span>
+                        <span *ngIf="updatingReportId !== report.id">
+                          {{ getStatusActionLabel(report) }}
+                        </span>
+                      </button>
 
-                  <td class="text-center">
-                    <button
-                      *ngIf="canToggleStatus(report)"
-                      type="button"
-                      class="btn table-action-btn"
-                      [ngClass]="
-                        report.reportStatus === 'Active'
-                          ? 'table-action-danger'
-                          : 'table-action-success'
-                      "
-                      [disabled]="updatingReportId === report.id"
-                      (click)="toggleReportStatus(report, $event)"
-                    >
-                      <span *ngIf="updatingReportId === report.id">Guardando...</span>
-                      <span *ngIf="updatingReportId !== report.id">
-                        {{ getStatusActionLabel(report) }}
+                      <span *ngIf="!canToggleStatus(report)" class="text-muted small">
+                        No disponible
                       </span>
-                    </button>
+                    </ng-container>
 
-                    <span *ngIf="!canToggleStatus(report)" class="text-muted small">
-                      No disponible
-                    </span>
+                    <ng-template #reportActionNotAvailable>
+                      <span class="text-muted small">No disponible</span>
+                    </ng-template>
                   </td>
+                  
 
                   <td class="text-center">
                     <button
@@ -208,6 +241,48 @@
                 </tr>
               </tbody>
             </table>
+
+            <div
+              *ngIf="filteredReports.length"
+              class="card-footer d-flex align-items-center justify-content-between"
+            >
+              <div class="d-flex align-items-center" style="gap:10px;">
+                <span class="text-muted">
+                  {{ searchedReports.length }} registros • Página {{ reportPage }} de {{ reportTotalPages }}
+                </span>
+
+                <select
+                  class="form-select form-select-sm"
+                  style="width: 90px;"
+                  [ngModel]="reportPageSize"
+                  (ngModelChange)="setReportPageSize($event)"
+                >
+                  <option *ngFor="let size of reportPageSizeOptions" [ngValue]="size">
+                    {{ size }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="btn-group btn-group-sm">
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="prevReportPage()"
+                  [disabled]="reportPage <= 1"
+                >
+                  Anterior
+                </button>
+
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="nextReportPage()"
+                  [disabled]="reportPage >= reportTotalPages"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

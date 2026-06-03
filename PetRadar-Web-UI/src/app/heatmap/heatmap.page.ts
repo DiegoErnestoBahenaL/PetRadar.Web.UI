@@ -13,6 +13,8 @@ import * as L from 'leaflet';
 import { ReportsHttpService } from './reports-http.service';
 import { ReportViewModel } from './report.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RoleEnum } from '../services/permission.service';
+
 
 @Component({
   selector: 'app-heatmap-page',
@@ -51,6 +53,85 @@ export class HeatmapPageComponent implements AfterViewInit {
     radius: 25,
     intensity: 0.8,
   };
+
+  reportSearchTerm = '';
+  reportPage = 1;
+  reportPageSize = 10;
+  reportPageSizeOptions = [5, 10, 25, 50];
+
+  get searchedReports(): ReportViewModel[] {
+    const term = this.reportSearchTerm.trim().toLowerCase();
+
+    if (!term) return this.filteredReports;
+
+    return this.filteredReports.filter((report) => {
+      const haystack = [
+        report.id,
+        this.getReportTypeLabel(report.reportType),
+        report.species,
+        this.getReportStatusLabel(report.reportStatus),
+        report.incidentDate,
+        report.addressText,
+      ]
+        .filter((value) => value != null)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
+  }
+
+  get pagedReports(): ReportViewModel[] {
+    const start = (this.reportPage - 1) * this.reportPageSize;
+    return this.searchedReports.slice(start, start + this.reportPageSize);
+  }
+
+  get reportTotalPages(): number {
+    return Math.max(1, Math.ceil(this.searchedReports.length / this.reportPageSize));
+  }
+
+  applyReportSearch(): void {
+    this.reportPage = 1;
+  }
+
+  setReportPageSize(size: number): void {
+    this.reportPageSize = Number(size);
+    this.reportPage = 1;
+  }
+
+  prevReportPage(): void {
+    this.reportPage = Math.max(1, this.reportPage - 1);
+  }
+
+  nextReportPage(): void {
+    this.reportPage = Math.min(this.reportTotalPages, this.reportPage + 1);
+  }
+
+  currentRole: RoleEnum | null = this.getRoleFromToken();
+
+  get canManageReports(): boolean {
+    return this.currentRole === RoleEnum.Admin || this.currentRole === RoleEnum.SuperAdmin;
+  }
+
+  private getRoleFromToken(): RoleEnum | null {
+    const token = localStorage.getItem('token');
+
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+
+      const role =
+        payload.role ??
+        payload.Role ??
+        payload.roles?.[0] ??
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      return role as RoleEnum;
+    } catch {
+      return null;
+    }
+  }
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -141,7 +222,7 @@ export class HeatmapPageComponent implements AfterViewInit {
         end.setHours(23, 59, 59, 999);
         if (reportDate > end) return false;
       }
-
+      this.reportPage = 1;
       return true;
     });
 
@@ -223,7 +304,10 @@ export class HeatmapPageComponent implements AfterViewInit {
 
   openReportDetail(report: ReportViewModel, event?: Event): void {
     event?.stopPropagation();
-    this.router.navigate(['/app/reports', report.id]);
+
+    this.router.navigate(['/app/reports', report.id], {
+      queryParams: { returnTo: '/app/heatmap' },
+    });
   }
 
   getReportTypeLabel(value?: string | null): string {
@@ -357,7 +441,7 @@ export class HeatmapPageComponent implements AfterViewInit {
           <div>Especie: ${report.species || 'N/D'}</div>
           <div>Estado: ${this.getReportStatusLabel(report.reportStatus)}</div>
           <div>Fecha: ${this.formatDate(report.incidentDate)}</div>
-          <div>Ubicación: ${this.getShortLocation(report)}</div>
+         <!-- <div>Ubicación: ${this.getShortLocation(report)}</div> -->
         </div>
       `, {
         direction: 'top',

@@ -90,7 +90,7 @@
                  }"></i>
             </th>
 
-            <th style="cursor:pointer;" (click)="toggleSort('phoneNumber')">
+            <!--<th style="cursor:pointer;" (click)="toggleSort('phoneNumber')">
               Teléfono
               <i class="fas ms-1"
                  [ngClass]="{
@@ -98,7 +98,7 @@
                    'fa-sort-up': sortKey === 'phoneNumber' && sortDir === 'asc',
                    'fa-sort-down': sortKey === 'phoneNumber' && sortDir === 'desc'
                  }"></i>
-            </th>
+            </th>-->
 
             <!--<th style="cursor:pointer;" (click)="toggleSort('isActive')">
               Activo
@@ -109,7 +109,7 @@
                    'fa-sort-down': sortKey === 'isActive' && sortDir === 'desc'
                  }"></i>
             </th> -->
-            <th style="width:140px;" class="text-end">Acciones</th>
+            <th style="width:140px;" class="text-center">Acciones</th>
             <th role="button" (click)="toggleSort('role')">
               Rol
             </th>
@@ -123,12 +123,12 @@
             <td>{{ u.email ?? '-' }}</td>
             <td>{{ u.name ?? '-' }}</td>
             <td>{{ u.lastName ?? '-' }}</td>
-            <td>{{ u.phoneNumber ?? '-' }}</td>
+            <!--<td>{{ u.phoneNumber ?? '-' }}</td>-->
 
             <!--<td>{{ u.isActive ?? '-' }}</td> -->
             
 
-            <td class="text-end text-nowrap">
+            <td class="text-center text-nowrap">
               <div class="btn-group btn-group-sm" role="group">
                 <button 
                   class="btn btn-outline-warning" 

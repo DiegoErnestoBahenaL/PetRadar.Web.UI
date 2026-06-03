@@ -15,7 +15,7 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 export type PetDialogData =
-  | { mode: 'create' }
+  | { mode: 'create'; userId?: number }
   | { mode: 'edit'; pet: UserPetViewModel };
 
 @Component({
@@ -106,6 +106,8 @@ export class PetDialogComponent {
   private initFromData() {
     this.errorMsg = null;
 
+
+    this.selectedMainImage = null;
     if (!this._data) return;
 
     if (this._data.mode === 'edit') {
@@ -129,9 +131,19 @@ export class PetDialogComponent {
 
       this.form.controls.userId.disable();
     } else {
-      this.form.reset({ isNeutered: false });
-      this.form.controls.userId.enable();
-    }
+        this.selectedMainImage = null;
+
+        this.form.reset({
+          userId: this._data.userId ?? null,
+          isNeutered: false,
+        });
+
+        if (this._data.userId) {
+          this.form.controls.userId.disable();
+        } else {
+          this.form.controls.userId.enable();
+        }
+      }
   }
 
   close(ok: boolean = false) {
@@ -169,9 +181,27 @@ export class PetDialogComponent {
       };
 
       this.petsApi.apiUserPetsPost(payload).subscribe({
-        next: () => { this.saving = false; this.close(true); },
-        error: (err) => { this.saving = false; this.errorMsg = err?.message ?? 'No se pudo crear'; },
+        next: (createdPet: any) => {
+          const createdPetId =
+            createdPet?.id ??
+            createdPet?.petId ??
+            createdPet?.userPetId ??
+            null;
+
+          if (this.selectedMainImage && createdPetId) {
+            this.uploadMainPictureAndClose(createdPetId, this.selectedMainImage);
+            return;
+          }
+
+          this.saving = false;
+          this.close(true);
+        },
+        error: (err) => {
+          this.saving = false;
+          this.errorMsg = err?.message ?? 'No se pudo crear';
+        },
       });
+
       return;
     }
 
@@ -193,8 +223,38 @@ export class PetDialogComponent {
     };
 
     this.petsApi.apiUserPetsIdPut(id, payload).subscribe({
-      next: () => { this.saving = false; this.close(true); },
-      error: (err) => { this.saving = false; this.errorMsg = err?.message ?? 'No se pudo actualizar'; },
+      next: () => {
+        if (this.selectedMainImage) {
+          this.uploadMainPictureAndClose(id, this.selectedMainImage);
+          return;
+        }
+
+        this.saving = false;
+        this.close(true);
+      },
+      error: (err) => {
+        this.saving = false;
+        this.errorMsg = err?.message ?? 'No se pudo actualizar';
+      },
     });
+  }
+
+  private uploadMainPictureAndClose(petId: number, file: File): void {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http
+      .put(`https://api-qa.petradar-qa.org/api/UserPets/${petId}/mainpicture`, formData)
+      .subscribe({
+        next: () => {
+          this.saving = false;
+          this.selectedMainImage = null;
+          this.close(true);
+        },
+        error: (err) => {
+          this.saving = false;
+          this.errorMsg = err?.message ?? 'La mascota se guardó, pero no se pudo subir la imagen.';
+        },
+      });
   }
 }
